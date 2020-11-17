@@ -61,3 +61,14 @@ voltage = decode_voltage(data)
 rssi = decode_rssi(data, data_length)
 snr = decode_snr(data, data_length)
 print(node_id, temp, pressure, humidity, voltage, rssi, snr)
+
+
+# print(output)
+#
+# { id: 'AAB296C4',
+#   temp: 25.33,
+#   pressure: 1030.6,
+#   humidity: 58,
+#   voltage: 4.72,
+#   rssi: -45,
+#   snr: 10 }
