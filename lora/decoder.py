@@ -142,8 +142,6 @@ data_length = droplet.data_len()
 
 sensorType = 'droplet'
 
-# nodeID = 'AAB296C4'.upper() or ''
-
 droplet_list = {'AAB296C4', 'AAB296C4'}
 
 payload = None
@@ -155,13 +153,16 @@ if droplet.check_payload_len():
         if droplet.decode_id() in s:
             d_code = droplet.decode_all()
             payload = d_code
-            log.info("decode_all {}".format(d_code))
         else:
             log.warning("droplet_list {} {}".format(droplet_list, droplet.decode_id()))
     else:
         log.warning("check_sensor_type {} {}".format(droplet.check_payload_len(), droplet.decode_id()))
 else:
     log.warning("check_payload_len {}".format(droplet.check_payload_len()))
+
+
+if payload is not None:
+    log.info("payload {}".format(payload))
 
 # if data_length != 36:
 #     print(222)

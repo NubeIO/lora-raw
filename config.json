@@ -5,4 +5,5 @@
   "mqtt_port": 1883,
   "topic": "mqtt_topic",
   "debug": true
+
 }
