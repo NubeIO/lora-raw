@@ -1,0 +1,17 @@
+[Unit]
+Description=NubeIO LoRa Raw pyserial
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/lora-raw
+ExecStart=/home/pi/bacnet-flask/venv/bin/python run.py
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=lora-raw
+
+[Install]
+WantedBy=multi-user.target
