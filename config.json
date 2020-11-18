@@ -1,0 +1,8 @@
+{
+  "port": "/dev/ttyACM0",
+  "baudrate": 9600,
+  "mqtt_server": "0.0.0.0",
+  "mqtt_port": 1883,
+  "topic": "mqtt_topic",
+  "debug": true
+}
