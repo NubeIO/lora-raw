@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 
-CONFIG_FILE = 'config.json'
+CONFIG_FILE = '../settings/config.json'
 try:
     with open(CONFIG_FILE) as config_file:
         config = json.load(config_file)
