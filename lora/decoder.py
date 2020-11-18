@@ -86,6 +86,7 @@ class LoRaV1DropletDecoder:
         type_b0 = "B0"
         type_b1 = "B1"
         type_b2 = "B2"
+        type_ab = "AB"
         sub = self._data[2:4]
         if sub == type_aa:
             return type_aa
@@ -95,6 +96,8 @@ class LoRaV1DropletDecoder:
             return type_b1
         elif sub == type_b2:
             return type_b2
+        elif sub == type_ab:
+            return type_ab
 
     def data_len(self):
         return len(self._data)
