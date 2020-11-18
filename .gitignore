@@ -1,5 +1,4 @@
 
-
 .idea
 
 # Byte-compiled / optimized / DLL files
@@ -113,6 +112,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+config.ini
+
 
 # Spyder project settings
 .spyderproject
