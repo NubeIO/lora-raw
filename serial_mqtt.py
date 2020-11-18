@@ -1,5 +1,8 @@
-import serial, sys, json, logging
+import json
+import logging
 import paho.mqtt.client as mqtt
+import serial
+import sys
 
 CONFIG_FILE = 'config.json'
 try:
