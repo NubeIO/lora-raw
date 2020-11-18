@@ -76,7 +76,7 @@ class LoRaV1DropletDecoder:
 
     def check_payload_len(self):
         dl = self._data_length
-        if dl == 36 or dl == 44:
+        if dl == 36 or dl == 32 or dl == 44: #TODO size 32 is for the old droplets needs to be removed
             return True
         else:
             return False
