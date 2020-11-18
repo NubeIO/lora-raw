@@ -107,9 +107,9 @@ class LoRaV1DropletDecoder:
         decode_voltage = LoRaV1DropletDecoder.decode_voltage(self)
         decode_rssi = LoRaV1DropletDecoder.decode_rssi(self)
         decode_snr = LoRaV1DropletDecoder.decode_snr(self)
-        return {'decode_id': decode_id, 'decode_pressure': decode_pressure,
-                'decode_temp': decode_temp, 'decode_humidity': decode_humidity,
-                'decode_voltage': decode_voltage, 'decode_rssi': decode_rssi, 'decode_snr': decode_snr}
+        return {'id': decode_id, 'pressure': decode_pressure,
+                'temp': decode_temp, 'humidity': decode_humidity,
+                'voltage': decode_voltage, 'rssi': decode_rssi, 'snr': decode_snr}
 
 
 # if data is None:
