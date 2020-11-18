@@ -4,6 +4,6 @@
   "mqtt_server": "0.0.0.0",
   "mqtt_port": 1883,
   "topic": "mqtt_topic",
-  "debug": true
-
+  "debug": true,
+  "sensor_list": ["AAB296C4", "AAB296C4"]
 }

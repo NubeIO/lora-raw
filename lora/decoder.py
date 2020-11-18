@@ -1,27 +1,28 @@
-import json
 import logging
-import sys
+import configparser
+import os
 
-CONFIG_FILE = '../settings/config.json'
-try:
-    with open(CONFIG_FILE) as config_file:
-        config = json.load(config_file)
-except:
-    print("Config file not present or invalid JSON!")
-    sys.exit(1)
+temp_path = os.path.dirname(os.path.abspath(__file__))
+part_config = os.path.join(temp_path, "../config.ini")
 
-logging.basicConfig(level=logging.DEBUG if config['debug'] else logging.WARNING, format="%(levelname)s: %(message)s")
+_config = configparser.ConfigParser()
+_config.read(part_config)
+config_debug = _config.get("debug", "debug")
+print(config_debug)
+
+
+logging.basicConfig(level=logging.DEBUG if config_debug else logging.WARNING, format="%(levelname)s: %(message)s")
 log = logging.getLogger("")
 
-data = 'AAB296C4E5094228BA0000EC0000009A2D64\r'
+# data = 'AAB296C4E5094228BA0000EC0000009A2D64\r'
 
-log.info("data dump {}".format(data))
+# log.info("data dump {}".format(data))
 
 
 class LoRaV1DropletDecoder:
     def __init__(self, _data):
         self._data = _data
-        self._data_length = len(data)
+        self._data_length = len(_data)
 
     def decode_id(self):
         x = self._data[0:8]
@@ -111,63 +112,8 @@ class LoRaV1DropletDecoder:
                 'decode_voltage': decode_voltage, 'decode_rssi': decode_rssi, 'decode_snr': decode_snr}
 
 
-def clean_data(_data):
-    """
-    cleans the payload data removes '\n' from the string
-    :param _data: string
-    :return: string
-    """
-    d = _data
-    dl = len(_data)
-    if dl % 2 == 1 and (d[dl - 1] == '\r' or d[dl - 1] == '\n'):
-        d = d[0:dl - 1]
-        return d
-    elif d[dl - 2:dl] == '\r\n':
-        d = d[0:dl - 2]
-        return d
-    else:
-        return d
-
-
-if data is None:
-    log.info("data is none")
-
-log.info("pre_clean_data {}".format({"pre_clean_data": data, "data_len": len(data)}))
-data = clean_data(data)
-droplet = LoRaV1DropletDecoder(data)
-log.info("after clean {}".format(
-    {"after_clean_data": data, "data_len": len(data), "check_len": droplet.check_payload_len()}))
-
-data_length = droplet.data_len()
-
-sensorType = 'droplet'
-
-droplet_list = {'AAB296C4', 'AAB296C4'}
-
-payload = None
-if droplet.check_payload_len():
-    log.info("check_payload_len {}".format(droplet.check_payload_len()))
-    if droplet.check_sensor_type():
-        log.info("check_sensor_type {}".format(droplet.check_sensor_type()))
-        s = droplet_list
-        if droplet.decode_id() in s:
-            d_code = droplet.decode_all()
-            payload = d_code
-        else:
-            log.warning("droplet_list {} {}".format(droplet_list, droplet.decode_id()))
-    else:
-        log.warning("check_sensor_type {} {}".format(droplet.check_payload_len(), droplet.decode_id()))
-else:
-    log.warning("check_payload_len {}".format(droplet.check_payload_len()))
-
-
-if payload is not None:
-    log.info("payload {}".format(payload))
-
-# if data_length != 36:
-#     print(222)
-
-# print(droplet.check_sensor_type())
+# if data is None:
+#     log.info("data is none")
 
 # { id: 'AAB296C4',
 #   temp: 25.33,
@@ -176,5 +122,3 @@ if payload is not None:
 #   voltage: 4.72,
 #   rssi: -45,
 #   snr: 10 }
-
-
