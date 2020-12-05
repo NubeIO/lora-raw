@@ -2,21 +2,25 @@ import logging
 import configparser
 import os
 
+from helpers.helper import to_bool
+
 temp_path = os.path.dirname(os.path.abspath(__file__))
-part_config = os.path.join(temp_path, "../config.ini")
+part_config = os.path.join(temp_path, "../../config.ini")
 
 _config = configparser.ConfigParser()
 _config.read(part_config)
-config_debug = _config.get("debug", "debug")
+config_debug = _config.get("debug", "disable")
 print(config_debug)
 
 
-logging.basicConfig(level=logging.DEBUG if config_debug else logging.WARNING, format="%(levelname)s: %(message)s")
+logging.basicConfig(
+     level=logging.INFO,
+     format="%(levelname)s: %(message)s",
+     datefmt='%d-%b-%y %H:%M:%S',
+ )
 log = logging.getLogger("")
+log.disabled = to_bool(config_debug)
 
-# data = 'AAB296C4E5094228BA0000EC0000009A2D64\r'
-
-# log.info("data dump {}".format(data))
 
 
 class LoRaV1DropletDecoder:
