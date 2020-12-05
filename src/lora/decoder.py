@@ -2,10 +2,10 @@ import logging
 import configparser
 import os
 
-from helpers.helper import to_bool
+from src.helpers.helper import to_bool
 
 temp_path = os.path.dirname(os.path.abspath(__file__))
-part_config = os.path.join(temp_path, "../../config.ini")
+part_config = os.path.join(temp_path, "../../settings/config.ini")
 
 _config = configparser.ConfigParser()
 _config.read(part_config)
