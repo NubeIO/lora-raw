@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt_client
 
 from src.ini_config import *
 
-MQTT_CLIENT_NAME = 'bacnet-server-mqtt'
+MQTT_CLIENT_NAME = 'bacnet-serial_driver-mqtt'
 MQTT_TOPIC = 'rubix/points'
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class MqttClient:
 
     @staticmethod
     def publish_mqtt_value(object_identifier, present_value):
-        topic = f"bacnet/server/points/ao/{object_identifier}"
+        topic = f"bacnet/serial_driver/points/ao/{object_identifier}"
         retain = mqtt__retain
         if not MqttClient.get_instance().status():
             logger.error("MQTT is not connected...")
@@ -75,7 +75,7 @@ class MqttClient:
             reasons = {
                 1: 'Connection refused - incorrect protocol version',
                 2: 'Connection refused - invalid client identifier',
-                3: 'Connection refused - server unavailable',
+                3: 'Connection refused - serial_driver unavailable',
                 4: 'Connection refused - bad username or password',
                 5: 'Connection refused - not authorised'
             }

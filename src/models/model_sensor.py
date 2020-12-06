@@ -1,9 +1,9 @@
 from src import db
-from src.interfaces.point.points import EventState, SensorType, SensorModel, MicroEdgeInputType
-from src.models.model_point_store import BACnetPointStoreModel
+from src.interfaces.sensor.sensor import EventState, SensorType, SensorModel, MicroEdgeInputType
+from src.models.model_sensor_store import SensorStore
 
 
-class BACnetPointModel(db.Model):
+class SensorModel(db.Model):
     __tablename__ = 'sensors'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     object_name = db.Column(db.String(80), nullable=False, unique=True)
@@ -20,8 +20,8 @@ class BACnetPointModel(db.Model):
     fault = db.Column(db.Integer(), nullable=True)
     data_round = db.Column(db.Integer(), nullable=True)
     data_offset = db.Column(db.Float(), nullable=True)
-    point_store = db.relationship('BACnetPointStoreModel',
-                                  backref='point',
+    point_store = db.relationship('SensorStore',
+                                  backref='sensor',
                                   lazy=False,
                                   uselist=False,
                                   cascade="all,delete")
@@ -29,7 +29,7 @@ class BACnetPointModel(db.Model):
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
-        return f"BACnetPointModel({self.uuid})"
+        return f"SensorModel({self.uuid})"
 
     @classmethod
     def find_by_uuid(cls, uuid):
@@ -42,11 +42,11 @@ class BACnetPointModel(db.Model):
     @classmethod
     def find_by_object_id(cls, object_type, address):
         return cls.query.filter(
-            (BACnetPointModel.object_type == object_type) & (BACnetPointModel.address == address)).first()
+            (SensorModel.object_type == object_type) & (SensorModel.address == address)).first()
 
     @classmethod
     def find_by_object_name(cls, object_name):
-        return cls.query.filter(BACnetPointModel.object_name == object_name).first()
+        return cls.query.filter(SensorModel.object_name == object_name).first()
 
     @classmethod
     def delete_all_from_db(cls):
@@ -54,9 +54,9 @@ class BACnetPointModel(db.Model):
         db.session.commit()
 
     def save_to_db(self):
-        # self.priority_array_write = PriorityArrayModel(point_uuid=self.uuid, **priority_array_write)
+        # self.priority_array_write = PriorityArrayModel(sensor_uuid=self.uuid, **priority_array_write)
         print(2222)
-        self.point_store = BACnetPointStoreModel.create_new_point_store_model(self.uuid)
+        self.point_store = SensorStore.create_new_point_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
 

@@ -5,14 +5,17 @@ RED="\033[31m"
 USER=""
 WORKING_DIR=""
 LIB_DIR=""
-SERVICE=nubeio-rubix-service.service
+SERVICE=nubeio-lora-raw.service
 SERVICE_DIR=/lib/systemd/system
 SERVICE_DIR_SOFT_LINK=/etc/systemd/system/multi-user.target.wants
+DATA_DIR=/data/lora-raw
+CONFIG_EXAMPLE=settings/config.example.ini
+CONFIG=config.ini
 COMMAND=""
 
 help() {
     echo "Service commands:"
-    echo -e "   ${GREEN}start -u=<user> -dir=<working_dir> -lib_dir=<lib_dir>${DEFAULT}   Start the service (-u=pi -dir=/home/pi/rubix-service -lib_dir=/home/pi/common-py-lib)"
+    echo -e "   ${GREEN}start -u=<user> -dir=<working_dir> -lib_dir=<lib_dir>${DEFAULT}   Start the service (-u=pi -dir=/home/pi/backend-${version}-${sha})"
     echo -e "   ${GREEN}disable${DEFAULT}                                                 Disable the service"
     echo -e "   ${GREEN}enable${DEFAULT}                                                  Enable the stopped service"
     echo -e "   ${GREEN}delete${DEFAULT}                                                  Delete the service"
@@ -24,6 +27,7 @@ help() {
     echo -e "   ${GREEN}-dir --working-dir=<working_dir>${DEFAULT}                        From where wires is starting"
     echo -e "   ${GREEN}-dir --lib_dir-dir=<lib_dir>${DEFAULT}                            From where lib should load"
 }
+
 start() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]
     then
@@ -32,6 +36,15 @@ start() {
         sed -i -e 's/<user>/'"${USER}"'/' ${SERVICE_DIR}/${SERVICE}
         sed -i -e 's,<working_dir>,'"${WORKING_DIR}"',' ${SERVICE_DIR}/${SERVICE}
         sed -i -e 's,<lib_dir>,'"${LIB_DIR}"',' ${SERVICE_DIR}/${SERVICE}
+
+        # Create data_dir and config.ini if not exist
+        mkdir -p ${DATA_DIR}
+        if [ ! -s ${DATA_DIR}/${CONFIG} ] ; then
+            echo "config.ini file doesn't exist (or it is empty)"
+            cp ${WORKING_DIR}/${CONFIG_EXAMPLE} ${DATA_DIR}/${CONFIG}
+            sudo chmod -R +755 ${DATA_DIR}/${CONFIG}
+        fi
+        sudo chown -R ${USER}:${USER} ${DATA_DIR}
 
         echo -e "${GREEN}Soft Un-linking Linux Service${DEFAULT}"
         sudo unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE}

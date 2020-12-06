@@ -12,15 +12,16 @@ else:
 config.read(filename)
 
 settings__enable_mqtt = config.getboolean('settings', 'enable_mqtt', fallback=False)
-settings__enable_bacnet_server = config.getboolean('settings', 'enable_bacnet_server', fallback=True)
+settings__enable_serial_driver = config.getboolean('settings', 'enable_serial_driver', fallback=True)
 
-device__ip = config.get('device', 'ip', fallback='192.168.0.100')
-device__port = config.getint('device', 'port', fallback=47808)
-device__device_id = config.get('device', 'device_id', fallback='123')
-device__local_obj_name = config.get('device', 'local_obj_name', fallback='Nube-IO')
-device__model_name = config.get('device', 'model_name', fallback='rubix-bac-stack-RC4')
-device__vendor_id = config.get('device', 'vendor_id', fallback='1173')
-device__vendor_name = config.get('device', 'vendor_name', fallback='Nube iO Operations Pty Ltd')
+
+serial__name = config.get('serial', 'name', fallback='lora-raw-network')
+serial__port = config.getint('serial', 'port', fallback='/dev/ttyUSB3')
+serial__speed = config.get('serial', 'speed', fallback=38400)
+serial__stop_bits = config.get('serial', 'stop_bits', fallback=1)
+serial__parity = config.get('serial', 'parity', fallback='N')
+device__byte_size = config.get('device', 'byte_size', fallback=8)
+
 
 mqtt__host = config.get('mqtt', 'host', fallback='0.0.0.0')
 mqtt__port = config.getint('mqtt', 'port', fallback=1883)
