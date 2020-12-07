@@ -1,110 +1,62 @@
-import logging
-import configparser
-import os
-
-from src.helpers.helper import to_bool
-
-temp_path = os.path.dirname(os.path.abspath(__file__))
-part_config = os.path.join(temp_path, "../../settings/config.ini")
-
-_config = configparser.ConfigParser()
-_config.read(part_config)
-config_debug = _config.get("debug", "disable")
-print(config_debug)
-
-
-logging.basicConfig(
-     level=logging.INFO,
-     format="%(levelname)s: %(message)s",
-     datefmt='%d-%b-%y %H:%M:%S',
- )
-log = logging.getLogger("")
-log.disabled = to_bool(config_debug)
-
-
-
 class LoRaV1DropletDecoder:
-    def __init__(self, _data):
-        self._data = _data
-        self._data_length = len(_data)
+    def __init__(self, data):
+        self.__data = data
+        self.__data_length = len(data)
 
     def decode_id(self):
-        x = self._data[0:8]
-        out = x
-        return out
+        return self.__data[0:8]
 
     def decode_pressure(self):
-        x = self._data[14:16]
-        y = self._data[12:14]
+        x = self.__data[14:16]
+        y = self.__data[12:14]
         out = int(x + y, 16) / 10
         return out
 
     def decode_temp(self):
-        x = self._data[10:12]
-        y = self._data[8:10]
+        x = self.__data[10:12]
+        y = self.__data[8:10]
         out = int(x + y, 16) / 100
         return out
 
     def decode_humidity(self):
-        x = self._data[14:18]
+        x = self.__data[14:18]
         out = int(x, 16) % 128
         return out
 
     def decode_voltage(self):
-        x = self._data[22:24]
+        x = self.__data[22:24]
         out = int(x, 16) / 50
         return out
 
     def decode_rssi(self):
-        a = self._data_length - 4
-        b = self._data_length - 2
-        x = self._data[a:b]
+        a = self.__data_length - 4
+        b = self.__data_length - 2
+        x = self.__data[a:b]
         x = int(x, 16)
         out = x * -1
         return out
 
     def decode_snr(self):
-        a = self._data_length - 2
-        b = self._data_length
-        x = self._data[a:b]
+        a = self.__data_length - 2
+        b = self.__data_length
+        x = self.__data[a:b]
         x = int(x, 16)
         out = x / 10
         return int(out)
 
-    def check_sensor_is_type(self):
-        sub = self._data[2:4]
-        if sub != 'AA' and sub != 'B0' and sub != 'B1' and sub != 'B2':
-            return True
-        else:
-            return False
-
     def check_payload_len(self):
-        dl = self._data_length
-        if dl == 36 or dl == 32 or dl == 44: #TODO size 32 is for the old droplets needs to be removed
-            return True
-        else:
-            return False
+        dl = self.__data_length
+        return dl == 36 or dl == 32 or dl == 44  # TODO size 32 is for the old droplets needs to be removed
 
     def check_sensor_type(self):
-        type_aa = "AA"
-        type_b0 = "B0"
-        type_b1 = "B1"
-        type_b2 = "B2"
-        type_ab = "AB"
-        sub = self._data[2:4]
-        if sub == type_aa:
-            return type_aa
-        elif sub == type_b0:
-            return type_b0
-        elif sub == type_b1:
-            return type_b1
-        elif sub == type_b2:
-            return type_b2
-        elif sub == type_ab:
-            return type_ab
+        supported_sensor_type = ["AA", "B0", "B1", "B2", "AB"]
+        sub = self.__data[2:4]
+        if sub in supported_sensor_type:
+            return sub
+        return None
 
     def data_len(self):
-        return len(self._data)
+        return self.__data_length
 
     def decode_all(self):
         decode_id = LoRaV1DropletDecoder.decode_id(self)
@@ -114,18 +66,12 @@ class LoRaV1DropletDecoder:
         decode_voltage = LoRaV1DropletDecoder.decode_voltage(self)
         decode_rssi = LoRaV1DropletDecoder.decode_rssi(self)
         decode_snr = LoRaV1DropletDecoder.decode_snr(self)
-        return {'id': decode_id, 'pressure': decode_pressure,
-                'temp': decode_temp, 'humidity': decode_humidity,
-                'voltage': decode_voltage, 'rssi': decode_rssi, 'snr': decode_snr}
-
-
-# if data is None:
-#     log.info("data is none")
-
-# { id: 'AAB296C4',
-#   temp: 25.33,
-#   pressure: 1030.6,
-#   humidity: 58,
-#   voltage: 4.72,
-#   rssi: -45,
-#   snr: 10 }
+        return {
+            'id': decode_id,
+            'pressure': decode_pressure,
+            'temp': decode_temp,
+            'humidity': decode_humidity,
+            'voltage': decode_voltage,
+            'rssi': decode_rssi,
+            'snr': decode_snr
+        }

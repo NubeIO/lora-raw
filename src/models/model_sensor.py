@@ -1,17 +1,17 @@
 from src import db
-from src.interfaces.sensor.sensor import EventState, SensorType, SensorModel, MicroEdgeInputType
+from src.interfaces.sensor.sensor import SensorType, SensorModelType, MicroEdgeInputType
 from src.models.model_sensor_store import SensorStore
 
 
 class SensorModel(db.Model):
     __tablename__ = 'sensors'
+
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     object_name = db.Column(db.String(80), nullable=False, unique=True)
     address = db.Column(db.Integer(), nullable=False, unique=True)
 
-    id = db.Column(db.String(120), nullable=False, unique=True)
     sensor_type = db.Column(db.Enum(SensorType), nullable=False)
-    sensor_model = db.Column(db.Enum(SensorModel), nullable=False)
+    sensor_model = db.Column(db.Enum(SensorModelType), nullable=False)
     micro_edge_input_type = db.Column(db.Enum(MicroEdgeInputType), nullable=False)
     sensor_wake_up_rate = db.Column(db.Integer(), nullable=False)
 
@@ -41,8 +41,7 @@ class SensorModel(db.Model):
 
     @classmethod
     def find_by_object_id(cls, object_type, address):
-        return cls.query.filter(
-            (SensorModel.object_type == object_type) & (SensorModel.address == address)).first()
+        return cls.query.filter((SensorModel.object_type == object_type) & (SensorModel.address == address)).first()
 
     @classmethod
     def find_by_object_name(cls, object_name):
@@ -54,8 +53,6 @@ class SensorModel(db.Model):
         db.session.commit()
 
     def save_to_db(self):
-        # self.priority_array_write = PriorityArrayModel(sensor_uuid=self.uuid, **priority_array_write)
-        print(2222)
         self.point_store = SensorStore.create_new_point_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()

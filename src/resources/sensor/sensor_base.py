@@ -19,14 +19,8 @@ class SensorBase(Resource):
 
     def add_point(self, data, uuid):
         try:
-            s = SensorModel(uuid=uuid, **data)
-            s.save_to_db()
-            return s
+            sensor = SensorModel(uuid=uuid, **data)
+            sensor.save_to_db()
+            return sensor
         except Exception as e:
             abort(500, message=str(e))
-
-    def abort_if_serial_is_not_running(self):
-        if not True:
-            abort(400, message='serial_driver is not running')
-        # if not BACServer.get_instance().status():
-        #     abort(400, message='Bacnet serial_driver is not running')

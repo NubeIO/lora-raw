@@ -1,4 +1,3 @@
-
 .idea
 
 test_raw.txt
@@ -114,7 +113,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-settings/config.ini
+config.ini
 
 
 # Spyder project settings
@@ -134,3 +133,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Local database
+data.db

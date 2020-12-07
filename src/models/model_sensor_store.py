@@ -5,6 +5,7 @@ from src import db
 
 class SensorStore(db.Model):
     __tablename__ = 'sensors_store'
+
     sensor_uuid = db.Column(db.String, db.ForeignKey('sensors.uuid'), primary_key=True, nullable=False)
     present_value = db.Column(db.Float(), nullable=False)
     ts = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
@@ -21,7 +22,6 @@ class SensorStore(db.Model):
     micro_edge_A1 = db.Column(db.Float(), nullable=True)
     micro_edge_A2 = db.Column(db.Float(), nullable=True)
     micro_edge_A3 = db.Column(db.Float(), nullable=True)
-
 
     def __repr__(self):
         return f"PointStore(sensor_uuid = {self.sensor_uuid})"

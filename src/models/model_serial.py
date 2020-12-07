@@ -12,7 +12,6 @@ class SerialDriverModel(db.Model):
     parity = db.Column(db.Enum(ModbusRtuParity), default=ModbusRtuParity.N)
     byte_size = db.Column(db.Integer(), default=8)
 
-
     @classmethod
     def find_one(cls):
         return cls.query.first()

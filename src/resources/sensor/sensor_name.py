@@ -29,17 +29,16 @@ class SensorName(SensorBase):
     @marshal_with(sensor_fields)
     def patch(self, object_name):
         data = SensorName.parser_patch.parse_args()
-        s = copy.deepcopy(SensorModel.find_by_object_name(object_name))
-        self.abort_if_serial_is_not_running()
-        if s is None:
+        sensor = SensorModel.find_by_object_name(object_name)
+        if sensor is None:
             abort(404, message=f"Does not exist {object_name}")
         try:
             non_none_data = {}
             for key in data.keys():
                 if data[key] is not None:
                     non_none_data[key] = data[key]
-            SensorModel.filter_by_uuid(s.uuid).update(non_none_data)
-            point_return = SensorModel.find_by_uuid(s.uuid)
-            return point_return
+            SensorModel.filter_by_uuid(sensor.uuid).update(non_none_data)
+            sensor_return = SensorModel.find_by_uuid(sensor.uuid)
+            return sensor_return
         except Exception as e:
             abort(500, message=str(e))
