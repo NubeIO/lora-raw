@@ -62,7 +62,7 @@ class SensorModel(db.Model):
         self.sensor_store = SensorStoreModel.create_new_point_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
-        DropletsRegistry.get_instance().add_droplet(self.object_name)
+        DropletsRegistry.get_instance().add_droplet(self.object_name, self.uuid)
 
     def delete_from_db(self):
         db.session.delete(self)

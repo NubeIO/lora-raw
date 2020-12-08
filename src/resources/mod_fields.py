@@ -1,7 +1,6 @@
 from flask_restful import fields
 
 sensor_store_fields = {
-    'present_value': fields.String,
     'pressure': fields.Float,
     'temp': fields.Float,
     'humidity': fields.Float,
@@ -16,7 +15,6 @@ sensor_store_fields = {
     'micro_edge_A2': fields.Float,
     'micro_edge_A3': fields.Float,
     'ts': fields.String
-
 }
 
 sensor_fields = {

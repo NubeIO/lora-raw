@@ -31,5 +31,5 @@ class SensorBase(Resource):
         SensorModel.filter_by_uuid(uuid).update(data)
         db.session.commit()
         sensor_return = SensorModel.find_by_uuid(uuid)
-        DropletsRegistry.get_instance().add_droplet(sensor_return.object_name)
+        DropletsRegistry.get_instance().add_droplet(sensor_return.object_name, uuid)
         return sensor_return

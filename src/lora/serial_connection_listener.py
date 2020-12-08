@@ -9,6 +9,7 @@ from src.lora.decoder import LoRaV1DropletDecoder
 from src.lora.droplet_registry import DropletsRegistry
 from src.lora.run_decoder import run_decoder
 from src.models.model_sensor import SensorModel
+from src.models.model_sensor_store import SensorStoreModel
 from src.models.model_serial import SerialDriverModel
 from src.mqtt_client import MqttClient
 
@@ -58,7 +59,7 @@ class SerialConnectionListener:
 
     def __sync_droplets_and_publish_on_mqtt(self):
         for point in SensorModel.get_all():
-            DropletsRegistry.get_instance().add_droplet(point.object_name)
+            DropletsRegistry.get_instance().add_droplet(point.object_name, point.uuid)
             point_store = point.sensor_store
             MqttClient.publish_mqtt_value(point.object_name, {
                 "pressure": point_store.pressure,
@@ -106,6 +107,9 @@ class SerialConnectionListener:
                     payload = run_decoder(droplet, DropletsRegistry.get_instance().get_droplets())
                     logger.debug("MQTT PAYLOAD {}".format(payload))
                     if payload is not None:
-                        MqttClient.publish_mqtt_value(droplet.decode_id(), droplet.decode_all())
+                        uuid = DropletsRegistry.get_instance().get_uuid_from_droplets(droplet.decode_id())
+                        SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
+                        SensorStoreModel.commit()
+                        MqttClient.publish_mqtt_value(droplet.decode_id(), payload)
             except Exception as e:
                 logger.error("{}".format(e))

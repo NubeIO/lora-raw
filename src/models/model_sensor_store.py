@@ -1,5 +1,3 @@
-from sqlalchemy import and_, or_
-
 from src import db
 
 
@@ -26,36 +24,13 @@ class SensorStoreModel(db.Model):
         return f"PointStore(sensor_uuid = {self.sensor_uuid})"
 
     @classmethod
-    def find_by_point_uuid(cls, sensor_uuid):
-        return cls.query.filter_by(sensor_uuid=sensor_uuid).first()
+    def filter_by_sensor_uuid(cls, sensor_uuid):
+        return cls.query.filter_by(sensor_uuid=sensor_uuid)
 
     @classmethod
     def create_new_point_store_model(cls, sensor_uuid):
         return SensorStoreModel(sensor_uuid=sensor_uuid)
 
-    def update(self) -> bool:
-        res = db.session.execute(self.__table__
-                                 .update()
-                                 .values(pressure=self.pressure,
-                                         temp=self.temp,
-                                         humidity=self.humidity,
-                                         voltage=self.voltage,
-                                         rssi=self.rssi,
-                                         snr=self.snr)
-                                 .where(and_(self.__table__.c.sensor_uuid == self.sensor_uuid,
-                                             or_(
-                                                 self.__table__.c.pressure == None,
-                                                 self.__table__.c.temp == None,
-                                                 self.__table__.c.humidity == None,
-                                                 self.__table__.c.voltage == None,
-                                                 self.__table__.c.rssi == None,
-                                                 self.__table__.c.snr == None,
-
-                                                 self.__table__.c.pressure != self.pressure,
-                                                 self.__table__.c.temp != self.temp,
-                                                 self.__table__.c.humidity != self.humidity,
-                                                 self.__table__.c.voltage != self.voltage,
-                                                 self.__table__.c.rssi != self.rssi,
-                                                 self.__table__.c.snr != self.snr,
-                                             ))))
-        return bool(res.rowcount)
+    @classmethod
+    def commit(cls):
+        db.session.commit()
