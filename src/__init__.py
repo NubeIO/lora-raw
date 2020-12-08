@@ -38,6 +38,7 @@ from src import routes  # importing for creating all the schema on un-existing c
 db.create_all()
 
 with app.app_context():
-    from src.background import Background
+    if os.environ.get("WERKZEUG_RUN_MAIN") or os.environ.get('SERVER_SOFTWARE'):
+        from src.background import Background
 
-    Background.run()
+        Background.run()

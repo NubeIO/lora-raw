@@ -37,12 +37,12 @@ class SensorSingular(SensorBase):
             for key in data.keys():
                 if data[key] is not None:
                     non_none_data[key] = data[key]
-            return self.update_point(uuid, non_none_data)
+            return self.update_sensor(uuid, non_none_data)
         except Exception as e:
             abort(500, message=str(e))
 
     def delete(self, uuid):
-        s = SensorModel.find_by_uuid(uuid)
-        if s:
-            s.delete_from_db()
+        sensor = SensorModel.find_by_uuid(uuid)
+        if sensor:
+            sensor.delete_from_db()
         return '', 204

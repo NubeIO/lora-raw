@@ -55,7 +55,7 @@ class MqttClient:
         MqttClient.__client.loop_forever()
 
     @staticmethod
-    def publish_mqtt_value(object_name, payload):
+    def publish_mqtt_value(object_name, payload: dict):
         topic = "lora_raw/{}".format(object_name)
         retain = mqtt__retain
         if not MqttClient.get_instance().status():
@@ -64,7 +64,7 @@ class MqttClient:
                 "Failed MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, retain))
             return
         logging.debug("MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, retain))
-        MqttClient.__client.publish(topic, payload, qos=mqtt__qos, retain=retain)
+        MqttClient.__client.publish(topic, str(payload), qos=mqtt__qos, retain=retain)
 
     @staticmethod
     def __on_connect(client, userdata, flags, reason_code, properties=None):

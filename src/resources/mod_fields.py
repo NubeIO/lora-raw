@@ -1,6 +1,6 @@
 from flask_restful import fields
 
-point_store_fields = {
+sensor_store_fields = {
     'present_value': fields.String,
     'pressure': fields.Float,
     'temp': fields.Float,
@@ -36,7 +36,7 @@ sensor_fields = {
     'data_offset': fields.Float,
     'created_on': fields.String,
     'updated_on': fields.String,
-    'point_store': fields.Nested(point_store_fields)
+    'sensor_store': fields.Nested(sensor_store_fields)
 }
 
 serial_driver_field = {

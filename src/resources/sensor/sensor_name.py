@@ -36,6 +36,6 @@ class SensorName(SensorBase):
             for key in data.keys():
                 if data[key] is not None:
                     non_none_data[key] = data[key]
-            return self.update_point(sensor.uuid, non_none_data)
+            return self.update_sensor(sensor.uuid, non_none_data)
         except Exception as e:
             abort(500, message=str(e))

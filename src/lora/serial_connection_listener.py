@@ -6,6 +6,7 @@ from serial import Serial
 from src.ini_config import settings__enable_mqtt, mqtt__publish_value, mqtt__attempt_reconnect_secs
 from src.lora.clean_payload import CleanPayload
 from src.lora.decoder import LoRaV1DropletDecoder
+from src.lora.droplet_registry import DropletsRegistry
 from src.lora.run_decoder import run_decoder
 from src.models.model_sensor import SensorModel
 from src.models.model_serial import SerialDriverModel
@@ -41,7 +42,8 @@ class SerialConnectionListener:
                 while not MqttClient.get_instance().status():
                     logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
                     time.sleep(mqtt__attempt_reconnect_secs)
-            self.__publish_stack()
+            logger.info("MQTT is connected successfully for publishing values...")
+            self.__sync_droplets_and_publish_on_mqtt()
             self.__read_and_store_value()
         except Exception as e:
             logging.error(f'Error: {str(e)}')
@@ -54,9 +56,10 @@ class SerialConnectionListener:
         """
         pass
 
-    def __publish_stack(self):
+    def __sync_droplets_and_publish_on_mqtt(self):
         for point in SensorModel.get_all():
-            point_store = point.store
+            DropletsRegistry.get_instance().add_droplet(point.object_name)
+            point_store = point.sensor_store
             MqttClient.publish_mqtt_value(point.object_name, {
                 "pressure": point_store.pressure,
                 "temp": point_store.temp,
@@ -67,7 +70,6 @@ class SerialConnectionListener:
             })
 
     def __connect(self, serial_driver: SerialDriverModel):
-
         self.__connection = Serial()
         self.__connection.port = serial_driver.port
         self.__connection.baudrate = serial_driver.baud_rate
@@ -101,8 +103,7 @@ class SerialConnectionListener:
                     droplet = LoRaV1DropletDecoder(data)
                     logger.debug("after clean {}".format(
                         {"after_clean_data": data, "data_len": len(data), "check_len": droplet.check_payload_len()}))
-                    droplet_list = []  # todo
-                    payload = run_decoder(droplet, droplet_list)
+                    payload = run_decoder(droplet, DropletsRegistry.get_instance().get_droplets())
                     logger.debug("MQTT PAYLOAD {}".format(payload))
                     if payload is not None:
                         MqttClient.publish_mqtt_value(droplet.decode_id(), droplet.decode_all())

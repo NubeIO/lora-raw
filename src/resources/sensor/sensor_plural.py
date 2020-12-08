@@ -8,15 +8,15 @@ from src.resources.sensor.sensor_base import SensorBase
 
 
 class SensorPlural(SensorBase):
-    @marshal_with(sensor_fields, envelope="points")
+    @marshal_with(sensor_fields, envelope="sensors")
     def get(self):
-        return SensorModel.query.all()
+        return SensorModel.get_all()
 
     @marshal_with(sensor_fields)
     def post(self):
         uuid_ = str(uuid.uuid4())
         data = SensorPlural.parser.parse_args()
-        return self.add_point(uuid_, data)
+        return self.add_sensor(uuid_, data)
 
     def delete(self):
         SensorModel.delete_all_from_db()
