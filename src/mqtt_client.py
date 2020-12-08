@@ -78,4 +78,4 @@ class MqttClient:
             }
             reason = reasons.get(reason_code, 'unknown')
             MqttClient.__client = None
-            raise Exception("MQTT Connection Failure: {}".format(reason)
+            raise Exception("MQTT Connection Failure: {}".format(reason))
