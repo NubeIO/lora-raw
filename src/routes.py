@@ -10,8 +10,8 @@ from src.resources.serial_driver.serial import SerialDriver
 api_prefix = 'api'
 api = Api(app)
 
-api.add_resource(SerialDriver, f'/{api_prefix}/lora/port')
-api.add_resource(SensorPlural, f'/{api_prefix}/lora/sensors')
-api.add_resource(SensorSingular, f'/{api_prefix}/lora/sensors/uuid/<string:uuid>')
-api.add_resource(SensorName, f'/{api_prefix}/lora/sensors/name/<string:object_name>')
-api.add_resource(Ping, f'/{api_prefix}/system/ping')
+api.add_resource(SerialDriver, '/{}/lora/port'.format(api_prefix))
+api.add_resource(SensorPlural, '/{}/lora/sensors'.format(api_prefix))
+api.add_resource(SensorSingular, '/{}/lora/sensors/uuid/<string:uuid>'.format(api_prefix))
+api.add_resource(SensorName, '/{}/lora/sensors/name/<string:object_name>'.format(api_prefix))
+api.add_resource(Ping, '/{}/system/ping'.format(api_prefix))

@@ -1,24 +1,22 @@
+import logging
 
-def run_decoder(droplet, droplet_list, log):
+from src.lora.decoder import LoRaV1DropletDecoder
+
+logger = logging.getLogger(__name__)
+
+
+def run_decoder(droplet: LoRaV1DropletDecoder, droplet_list):
     payload = None
     if droplet.check_payload_len():
-        log.info("check_payload_len {}".format(droplet.check_payload_len()))
+        logger.debug("check_payload_len {}".format(droplet.check_payload_len()))
         if droplet.check_sensor_type():
-            log.info("check_sensor_type {}".format(droplet.check_sensor_type()))
-            s = droplet_list
-            if droplet.decode_id() in s:
-                d_code = droplet.decode_all()
-                payload = d_code
-                return payload
+            logger.debug("check_sensor_type {}".format(droplet.check_sensor_type()))
+            if droplet.decode_id() in droplet_list:
+                payload = droplet.decode_all()
             else:
-                log.warning("droplet_list {} {}".format(droplet_list, droplet.decode_id()))
-                return payload
+                logger.warning("Doesn't match droplet_list {} {}".format(droplet_list, droplet.decode_id()))
         else:
-            log.warning("check_sensor_type {} {}".format(droplet.check_payload_len(), droplet.decode_id()))
-            return payload
+            logger.warning("Failure on check_sensor_type {} {}".format(droplet.check_payload_len(), droplet.decode_id()))
     else:
-        log.warning("check_payload_len {}".format(droplet.check_payload_len()))
-        return payload
-
-
-
+        logger.warning("Failure on check_payload_len {}".format(droplet.check_payload_len()))
+    return payload

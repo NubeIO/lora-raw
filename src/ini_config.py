@@ -16,11 +16,12 @@ settings__enable_serial_driver = config.getboolean('settings', 'enable_serial_dr
 
 
 serial__name = config.get('serial', 'name', fallback='lora-raw-network')
-serial__port = config.getint('serial', 'port', fallback='/dev/ttyUSB3')
-serial__speed = config.get('serial', 'speed', fallback=38400)
-serial__stop_bits = config.get('serial', 'stop_bits', fallback=1)
+serial__port = config.get('serial', 'port', fallback='/dev/ttyUSB3')
+serial__baud_rate = config.getint('serial', 'baud_rate', fallback=38400)
+serial__stop_bits = config.getint('serial', 'stop_bits', fallback=1)
 serial__parity = config.get('serial', 'parity', fallback='N')
-device__byte_size = config.get('device', 'byte_size', fallback=8)
+serial__byte_size = config.getint('serial', 'byte_size', fallback=8)
+serial__timeout = config.getint('serial', 'timeout', fallback=5)
 
 
 mqtt__host = config.get('mqtt', 'host', fallback='0.0.0.0')
@@ -31,4 +32,3 @@ mqtt__retain = config.getboolean('mqtt', 'retain', fallback=False)
 mqtt__publish_value = config.getboolean('mqtt', 'publish_value', fallback=True)
 mqtt__attempt_reconnect_on_unavailable = config.getboolean('mqtt', 'attempt_reconnect_on_unavailable', fallback=True)
 mqtt__attempt_reconnect_secs = config.getint('mqtt', 'attempt_reconnect_secs', fallback=5)
-mqtt__debug = config.getboolean('mqtt', 'debug', fallback=False)

@@ -1,12 +1,13 @@
 import enum
 
+
 class SensorType(enum.Enum):
     DROPLET = 1
     MICRO_EDGE = 2
     IO_10 = 3
 
 
-class SensorModel(enum.Enum):
+class SensorModelType(enum.Enum):
     MICRO_EDGE = 1
     DROPLET_TH = 2
     DROPLET_THL = 3

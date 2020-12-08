@@ -2,30 +2,26 @@ import configparser
 import json
 import logging
 import os
+import sys
 
 import paho.mqtt.client as mqtt
 import serial
-import sys
 
-from src.helpers.helper import to_bool
-from src.lora.decoder import LoRaV1DropletDecoder
 from src.lora.clean_payload import CleanPayload
+from src.lora.decoder import LoRaV1DropletDecoder
 from src.lora.run_decoder import run_decoder
 
 temp_path = os.path.dirname(os.path.abspath(__file__))
-part_config = os.path.join(temp_path, "settings/config.ini")
-
+part_config = os.path.join(temp_path, "../settings/config.ini")
 
 config = configparser.ConfigParser()
 config.read(part_config)
-config_debug = config.get("debug", "disable")
-config_baudrate = config.get("serial", "speed")
+config_baudrate = config.getint("serial", "baud_rate")
 config_port = config.get("serial", "port")
 config_sensor_list = config.get("sensor_list", "sensor_list")
 
 config_broker = config.get("mqtt", "host")
-config_mqtt_port = config.get("mqtt", "port")
-config_mqtt_port = int(config_mqtt_port)
+config_mqtt_port = config.getint("mqtt", "port")
 config_topic = config.get("mqtt", "topic")
 
 ser = serial.Serial()
@@ -33,17 +29,13 @@ ser.baudrate = config_baudrate
 ser.port = config_port
 ser.timeout = 5
 
-
-
-# logging.basicConfig(level=logging.DEBUG if config_debug else logging.WARNING, format="%(levelname)s: %(message)s")
 logging.basicConfig(
-     level=logging.INFO,
-     format="%(levelname)s: %(message)s",
-     datefmt='%d-%b-%y %H:%M:%S',
- )
-log = logging.getLogger("")
-log.disabled = to_bool(config_debug)
-#
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s",
+    datefmt='%d-%b-%y %H:%M:%S',
+)
+log = logging.getLogger(__name__)
+
 try:
     ser.open()
     log.info("Worked to open serial port {}!".format(config_port))
@@ -97,10 +89,6 @@ except Exception as e:
 
 mqttc.loop_start()
 
-# if payload is not None:
-#     log.info("payload {}".format(payload))
-
-
 while True:
     try:
         line = ser.readline().rstrip()
@@ -117,7 +105,7 @@ while True:
             sensorType = 'droplet'
             droplet_list = config_sensor_list
             log.info("droplet_list{}".format(droplet_list))
-            payload = run_decoder(droplet, droplet_list, log)
+            payload = run_decoder(droplet, droplet_list)
             log.info("MQTT PAYLOAD {}".format(payload))
             if payload is not None:
                 post_mqtt(config_topic, payload)

@@ -1,8 +1,8 @@
 import logging
 from threading import Thread
 
-from src.ini_config import *
-from src.mqtt_client import MqttClient
+from src.lora.serial_connection_listener import SerialConnectionListener
+from src.mqtt_client import MqttClient, settings__enable_mqtt, settings__enable_serial_driver
 
 logger = logging.getLogger(__name__)
 
@@ -16,4 +16,4 @@ class Background:
             mqtt_thread.start()
 
         if settings__enable_serial_driver:
-            print('ENBALE SERIAL')
+            SerialConnectionListener.get_instance().start()
