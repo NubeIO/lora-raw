@@ -8,18 +8,18 @@ class SensorModel(db.Model):
 
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     object_name = db.Column(db.String(80), nullable=False, unique=True)
-    address = db.Column(db.Integer(), nullable=False, unique=True)
+    address = db.Column(db.Integer, nullable=False, unique=True)
 
     sensor_type = db.Column(db.Enum(SensorType), nullable=False)
     sensor_model = db.Column(db.Enum(SensorModelType), nullable=False)
     micro_edge_input_type = db.Column(db.Enum(MicroEdgeInputType), nullable=False)
-    sensor_wake_up_rate = db.Column(db.Integer(), nullable=False)
+    sensor_wake_up_rate = db.Column(db.Integer, nullable=False)
 
     description = db.Column(db.String(120), nullable=False)
-    enable = db.Column(db.Boolean(), nullable=False)
-    fault = db.Column(db.Integer(), nullable=True)
-    data_round = db.Column(db.Integer(), nullable=True)
-    data_offset = db.Column(db.Float(), nullable=True)
+    enable = db.Column(db.Boolean, nullable=False)
+    fault = db.Column(db.Integer, nullable=True)
+    data_round = db.Column(db.Integer, default=2)
+    data_offset = db.Column(db.Float, default=0)
     point_store = db.relationship('SensorStore',
                                   backref='sensor',
                                   lazy=False,

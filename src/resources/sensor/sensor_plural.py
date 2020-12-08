@@ -16,7 +16,7 @@ class SensorPlural(SensorBase):
     def post(self):
         uuid_ = str(uuid.uuid4())
         data = SensorPlural.parser.parse_args()
-        return self.add_point(data, uuid_)
+        return self.add_point(uuid_, data)
 
     def delete(self):
         SensorModel.delete_all_from_db()

@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from flask_restful import fields
 
 point_store_fields = {
@@ -10,6 +8,7 @@ point_store_fields = {
     'voltage': fields.Float,
     'rssi': fields.Float,
     'snr': fields.Float,
+    'lux': fields.Float,
     'movement': fields.Float,
     'low_battery_alm': fields.Integer,
     'micro_edge_pulse_count': fields.Integer,
@@ -23,10 +22,8 @@ point_store_fields = {
 sensor_fields = {
     'uuid': fields.String,
     'object_name': fields.String,
-    'node_id': fields.String,
     'address': fields.Integer,
 
-    'id': fields.String,
     'sensor_type': fields.String(attribute="sensor_type.name"),
     'sensor_model': fields.String(attribute="sensor_model.name"),
     'micro_edge_input_type': fields.String(attribute="micro_edge_input_type.name"),

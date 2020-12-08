@@ -7,17 +7,17 @@ from src.resources.sensor.sensor_base import SensorBase
 
 class SensorSingular(SensorBase):
     parser_patch = reqparse.RequestParser()
-    parser_patch.add_argument('address', type=int, required=False)
-    parser_patch.add_argument('id', type=str, required=True)
-    parser_patch.add_argument('sensor_type', type=str, required=True)
-    parser_patch.add_argument('sensor_model', type=str, required=True)
+    parser_patch.add_argument('object_name', type=str)
+    parser_patch.add_argument('address', type=int)
+    parser_patch.add_argument('sensor_type', type=str)
+    parser_patch.add_argument('sensor_model', type=str)
     parser_patch.add_argument('micro_edge_input_type', type=str)
-    parser_patch.add_argument('sensor_wake_up_rate', type=int, required=False)
-    parser_patch.add_argument('description', type=str, required=False)
-    parser_patch.add_argument('enable', type=bool, required=False)
-    parser_patch.add_argument('fault', type=int, required=False)
-    parser_patch.add_argument('data_round', type=int, required=False)
-    parser_patch.add_argument('data_offset', type=float, required=False)
+    parser_patch.add_argument('sensor_wake_up_rate', type=int)
+    parser_patch.add_argument('description', type=str)
+    parser_patch.add_argument('enable', type=bool)
+    parser_patch.add_argument('fault', type=int)
+    parser_patch.add_argument('data_round', type=int)
+    parser_patch.add_argument('data_offset', type=float)
 
     @marshal_with(sensor_fields)
     def get(self, uuid):
@@ -37,9 +37,7 @@ class SensorSingular(SensorBase):
             for key in data.keys():
                 if data[key] is not None:
                     non_none_data[key] = data[key]
-            SensorModel.filter_by_uuid(uuid).update(non_none_data)
-            sensor_return = SensorModel.find_by_uuid(uuid)
-            return sensor_return
+            return self.update_point(uuid, non_none_data)
         except Exception as e:
             abort(500, message=str(e))
 
