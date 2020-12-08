@@ -1,6 +1,6 @@
 from src import db
 from src.interfaces.sensor.sensor import SensorType, SensorModelType, MicroEdgeInputType
-from src.models.model_sensor_store import SensorStore
+from src.models.model_sensor_store import SensorStoreModel
 
 
 class SensorModel(db.Model):
@@ -20,16 +20,20 @@ class SensorModel(db.Model):
     fault = db.Column(db.Integer, nullable=True)
     data_round = db.Column(db.Integer, default=2)
     data_offset = db.Column(db.Float, default=0)
-    point_store = db.relationship('SensorStore',
-                                  backref='sensor',
-                                  lazy=False,
-                                  uselist=False,
-                                  cascade="all,delete")
+    sensor_store = db.relationship('SensorStoreModel',
+                                   backref='sensor',
+                                   lazy=False,
+                                   uselist=False,
+                                   cascade="all,delete")
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
         return f"SensorModel({self.uuid})"
+
+    @classmethod
+    def get_all(cls):
+        return cls.query.all()
 
     @classmethod
     def find_by_uuid(cls, uuid):
@@ -53,7 +57,7 @@ class SensorModel(db.Model):
         db.session.commit()
 
     def save_to_db(self):
-        self.point_store = SensorStore.create_new_point_store_model(self.uuid)
+        self.point_store = SensorStoreModel.create_new_point_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
 

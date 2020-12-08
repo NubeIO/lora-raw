@@ -29,8 +29,6 @@ rtu_baud_rate = {
 }
 
 
-# Parity
-# The type of checksum to use to verify data integrity. This can be on of the following
 class ModbusRtuParity(enum.Enum):
     O = 0
     E = 1

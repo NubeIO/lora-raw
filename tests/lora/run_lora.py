@@ -16,7 +16,7 @@ part_config = os.path.join(temp_path, "../settings/config.ini")
 
 config = configparser.ConfigParser()
 config.read(part_config)
-config_baudrate = config.get("serial", "speed")
+config_baudrate = config.getint("serial", "baud_rate")
 config_port = config.get("serial", "port")
 config_sensor_list = config.get("sensor_list", "sensor_list")
 

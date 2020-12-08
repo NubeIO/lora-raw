@@ -3,7 +3,7 @@ from sqlalchemy import and_, or_
 from src import db
 
 
-class SensorStore(db.Model):
+class SensorStoreModel(db.Model):
     __tablename__ = 'sensors_store'
 
     sensor_uuid = db.Column(db.String, db.ForeignKey('sensors.uuid'), primary_key=True, nullable=False)
@@ -31,7 +31,7 @@ class SensorStore(db.Model):
 
     @classmethod
     def create_new_point_store_model(cls, sensor_uuid):
-        return SensorStore(sensor_uuid=sensor_uuid)
+        return SensorStoreModel(sensor_uuid=sensor_uuid)
 
     def update(self) -> bool:
         res = db.session.execute(self.__table__

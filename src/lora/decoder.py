@@ -59,7 +59,6 @@ class LoRaV1DropletDecoder:
         return self.__data_length
 
     def decode_all(self):
-        decode_id = LoRaV1DropletDecoder.decode_id(self)
         decode_pressure = LoRaV1DropletDecoder.decode_pressure(self)
         decode_temp = LoRaV1DropletDecoder.decode_temp(self)
         decode_humidity = LoRaV1DropletDecoder.decode_humidity(self)
@@ -67,7 +66,6 @@ class LoRaV1DropletDecoder:
         decode_rssi = LoRaV1DropletDecoder.decode_rssi(self)
         decode_snr = LoRaV1DropletDecoder.decode_snr(self)
         return {
-            'id': decode_id,
             'pressure': decode_pressure,
             'temp': decode_temp,
             'humidity': decode_humidity,

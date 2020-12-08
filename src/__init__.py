@@ -33,3 +33,8 @@ db = SQLAlchemy(app)
 from src import routes  # importing for creating all the schema on un-existing case
 
 db.create_all()
+
+with app.app_context():
+    from src.background import Background
+
+    Background.run()
