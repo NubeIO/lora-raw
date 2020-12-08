@@ -3,9 +3,10 @@ import uuid
 from src import db
 from src.ini_config import *
 from src.interfaces.serial_network import ModbusRtuParity
+from src.models.model_base import ModelBase
 
 
-class SerialDriverModel(db.Model):
+class SerialDriverModel(ModelBase):
     __tablename__ = 'serial'
 
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
@@ -27,10 +28,6 @@ class SerialDriverModel(db.Model):
 
     def save_to_db(self):
         db.session.add(self)
-        db.session.commit()
-
-    @classmethod
-    def commit(cls):
         db.session.commit()
 
     @classmethod

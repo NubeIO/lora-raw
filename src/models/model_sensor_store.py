@@ -1,7 +1,8 @@
 from src import db
+from src.models.model_base import ModelBase
 
 
-class SensorStoreModel(db.Model):
+class SensorStoreModel(ModelBase):
     __tablename__ = 'sensors_store'
 
     sensor_uuid = db.Column(db.String, db.ForeignKey('sensors.uuid'), primary_key=True, nullable=False)
@@ -28,9 +29,5 @@ class SensorStoreModel(db.Model):
         return cls.query.filter_by(sensor_uuid=sensor_uuid)
 
     @classmethod
-    def create_new_point_store_model(cls, sensor_uuid):
+    def create_new_sensor_store_model(cls, sensor_uuid):
         return SensorStoreModel(sensor_uuid=sensor_uuid)
-
-    @classmethod
-    def commit(cls):
-        db.session.commit()

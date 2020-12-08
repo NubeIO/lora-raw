@@ -1,10 +1,11 @@
 from src import db
 from src.interfaces.sensor.sensor import SensorType, SensorModelType, MicroEdgeInputType
 from src.lora.droplet_registry import DropletsRegistry
+from src.models.model_base import ModelBase
 from src.models.model_sensor_store import SensorStoreModel
 
 
-class SensorModel(db.Model):
+class SensorModel(ModelBase):
     __tablename__ = 'sensors'
 
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
@@ -59,7 +60,7 @@ class SensorModel(db.Model):
         DropletsRegistry.get_instance().remove_all_droplets()
 
     def save_to_db(self):
-        self.sensor_store = SensorStoreModel.create_new_point_store_model(self.uuid)
+        self.sensor_store = SensorStoreModel.create_new_sensor_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
         DropletsRegistry.get_instance().add_droplet(self.object_name, self.uuid)
