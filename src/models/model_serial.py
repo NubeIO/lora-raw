@@ -18,11 +18,19 @@ class SerialDriverModel(db.Model):
     timeout = db.Column(db.Integer, default=5)
 
     @classmethod
+    def filter_one(cls):
+        return cls.query.filter()
+
+    @classmethod
     def find_one(cls):
         return cls.query.first()
 
     def save_to_db(self):
         db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def commit(cls):
         db.session.commit()
 
     @classmethod

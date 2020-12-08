@@ -1,5 +1,6 @@
 import logging
 import time
+from threading import Thread
 
 from serial import Serial
 
@@ -18,12 +19,15 @@ logger = logging.getLogger(__name__)
 
 class SerialConnectionListener:
     __instance = None
+    __thread = None
 
     def __init__(self):
         if SerialConnectionListener.__instance:
             raise Exception("SerialConnectionListener class is a singleton class!")
         else:
             self.__connection = None
+            self.__loop = True
+            self.__is_running = False
             SerialConnectionListener.__instance = self
 
     @staticmethod
@@ -36,8 +40,25 @@ class SerialConnectionListener:
         return self.__connection is not None
 
     def start(self):
+        serial_driver = SerialDriverModel.create_default_server_if_does_not_exist()
+        self.__start_thread(serial_driver)
+
+    def restart(self, new_serial_driver):
+        logger.info("Restarting the serial driver...")
+        if self.status():
+            logger.info('Closing old connection...')
+            self.__loop = False
+            while self.__is_running:
+                time.sleep(1)
+            self.__connection.close()
+        self.__start_thread(new_serial_driver)
+
+    def __start_thread(self, new_serial_driver):
+        SerialConnectionListener.__thread = Thread(target=self.__start, daemon=True, args=(new_serial_driver,))
+        SerialConnectionListener.__thread.start()
+
+    def __start(self, serial_driver):
         try:
-            serial_driver = SerialDriverModel.create_default_server_if_does_not_exist()
             self.__connect(serial_driver)
             if settings__enable_mqtt and mqtt__publish_value:
                 while not MqttClient.get_instance().status():
@@ -47,15 +68,8 @@ class SerialConnectionListener:
             self.__sync_droplets_and_publish_on_mqtt()
             self.__read_and_store_value()
         except Exception as e:
+            self.__connection = None
             logging.error(f'Error: {str(e)}')
-
-    def restart(self, old_serial_driver, new_serial_driver):
-        """
-        It tries to establish connection with new configuration,
-        If it fails it will re-establish connection with old one,
-        Even this re-establishment with old one got error, we send an error message
-        """
-        pass
 
     def __sync_droplets_and_publish_on_mqtt(self):
         for point in SensorModel.get_all():
@@ -86,14 +100,16 @@ class SerialConnectionListener:
             import serial.tools.list_ports
             ports = serial.tools.list_ports.comports()
             print("Available serial ports:")
-            for port, desc, hwid in sorted(ports):
+            for port, desc, _ in sorted(ports):
                 print("{}: {}".format(port, desc))
 
     def __read_and_store_value(self):
+        self.__loop = True
+        self.__is_running = True
         if not self.__connection:
             logger.error("Can't read and store value with closed connection")
             return
-        while True:
+        while self.__loop:
             try:
                 line = self.__connection.readline().rstrip()
                 if line != b'':
@@ -113,3 +129,4 @@ class SerialConnectionListener:
                         MqttClient.publish_mqtt_value(droplet.decode_id(), payload)
             except Exception as e:
                 logger.error("{}".format(e))
+        self.__is_running = False

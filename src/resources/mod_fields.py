@@ -38,10 +38,12 @@ sensor_fields = {
 }
 
 serial_driver_field = {
+    'uuid': fields.String,
     'name': fields.String,
     'port': fields.String,
-    'speed': fields.Integer,
-    'stop_bits': fields.String,
-    'parity': fields.Integer,
+    'baud_rate': fields.Integer,
+    'stop_bits': fields.Integer,
+    'parity': fields.String(attribute="parity.name"),
     'byte_size': fields.Integer,
+    'timeout': fields.Integer,
 }

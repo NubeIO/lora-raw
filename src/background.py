@@ -16,5 +16,4 @@ class Background:
             mqtt_thread.start()
 
         if settings__enable_serial_driver:
-            bacnet_thread = Thread(target=SerialConnectionListener.get_instance().start, daemon=True)
-            bacnet_thread.start()
+            SerialConnectionListener.get_instance().start()
