@@ -28,6 +28,7 @@ class SerialConnectionListener:
             self.__connection = None
             self.__loop = True
             self.__is_running = False
+            self.__serial_driver = None
             SerialConnectionListener.__instance = self
 
     @staticmethod
@@ -43,7 +44,7 @@ class SerialConnectionListener:
         serial_driver = SerialDriverModel.create_default_server_if_does_not_exist()
         self.__start_thread(serial_driver)
 
-    def restart(self, new_serial_driver):
+    def restart(self, new_serial_driver, thread=True):
         logger.info("Restarting the serial driver...")
         if self.status():
             logger.info('Closing old connection...')
@@ -51,21 +52,28 @@ class SerialConnectionListener:
             while self.__is_running:
                 time.sleep(1)
             self.__connection.close()
-        self.__start_thread(new_serial_driver)
+        if thread:
+            self.__start_thread(new_serial_driver, False)
+        else:
+            self.__start(new_serial_driver, False)
 
-    def __start_thread(self, new_serial_driver):
-        SerialConnectionListener.__thread = Thread(target=self.__start, daemon=True, args=(new_serial_driver,))
+    def __start_thread(self, serial_driver, sync_droplets_and_publish_on_mqtt=True):
+        SerialConnectionListener.__thread = Thread(target=self.__start,
+                                                   daemon=True,
+                                                   args=(serial_driver, sync_droplets_and_publish_on_mqtt))
         SerialConnectionListener.__thread.start()
 
-    def __start(self, serial_driver):
+    def __start(self, serial_driver, sync_droplets_and_publish_on_mqtt):
         try:
             self.__connect(serial_driver)
-            if settings__enable_mqtt and mqtt__publish_value:
-                while not MqttClient.get_instance().status():
-                    logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
-                    time.sleep(mqtt__attempt_reconnect_secs)
-            logger.info("MQTT is connected successfully for publishing values...")
-            self.__sync_droplets_and_publish_on_mqtt()
+            if sync_droplets_and_publish_on_mqtt:
+                if settings__enable_mqtt and mqtt__publish_value:
+                    while not MqttClient.get_instance().status():
+                        logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
+                        time.sleep(mqtt__attempt_reconnect_secs)
+                logger.info("MQTT is connected successfully for publishing values...")
+                self.__sync_droplets_and_publish_on_mqtt()
+            self.__serial_driver = serial_driver
             self.__read_and_store_value()
         except Exception as e:
             self.__connection = None
@@ -99,18 +107,20 @@ class SerialConnectionListener:
             logger.error("Failed to open serial port {}!".format(serial_driver.port))
             import serial.tools.list_ports
             ports = serial.tools.list_ports.comports()
-            print("Available serial ports:")
+            logger.info("Available serial ports are:")
+            i = 0
             for port, desc, _ in sorted(ports):
-                print("{}: {}".format(port, desc))
+                i += 1
+                logger.info("{}. {}: {}".format(i, port, desc))
 
     def __read_and_store_value(self):
         self.__loop = True
         self.__is_running = True
-        if not self.__connection:
-            logger.error("Can't read and store value with closed connection")
-            return
+
         while self.__loop:
             try:
+                if not self.__connection:
+                    raise Exception("Can't read and store value with closed connection")
                 line = self.__connection.readline().rstrip()
                 if line != b'':
                     data = line.decode('utf-8')
@@ -128,5 +138,8 @@ class SerialConnectionListener:
                         SensorStoreModel.commit()
                         MqttClient.publish_mqtt_value(droplet.decode_id(), payload)
             except Exception as e:
+                self.__connection = None
                 logger.error("{}".format(e))
+                time.sleep(5)
+                self.restart(self.__serial_driver, False)
         self.__is_running = False
