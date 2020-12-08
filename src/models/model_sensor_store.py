@@ -22,7 +22,8 @@ class SensorStoreModel(ModelBase):
     ts = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
-        return f"PointStore(sensor_uuid = {self.sensor_uuid})"
+        # return f"PointStore(sensor_uuid = {self.sensor_uuid})"
+          return "PointStore(sensor_uuid = {})".format(self.sensor_uuid})
 
     @classmethod
     def filter_by_sensor_uuid(cls, sensor_uuid):

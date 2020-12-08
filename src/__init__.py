@@ -16,7 +16,9 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 if os.environ.get("data_dir") is None:
     url = 'sqlite:///data.db?timeout=60&check_same_thread=false'
 else:
-    url = f'sqlite:///{os.environ.get("data_dir")}/data.db?timeout=60&check_same_thread=false'
+    url = "sqlite:///{}/data.db?timeout=60&check_same_thread=false".format(os.environ.get("data_dir"))
+    # url = f'sqlite:///{os.environ.get("data_dir")}/data.db?timeout=60&check_same_thread=false'
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', url)
 
