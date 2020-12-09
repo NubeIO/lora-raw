@@ -31,7 +31,6 @@ class SensorModel(ModelBase):
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
-        # return f"SensorModel({self.uuid})"
         return "SensorModel({})".format(self.uuid)
 
     @classmethod
