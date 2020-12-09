@@ -78,7 +78,6 @@ class SerialConnectionListener:
         except Exception as e:
             self.__connection = None
             logging.error("Error: {}".format(str(e)))
-            #   logging.error(f'Error: {str(e)}')
 
     def __sync_droplets_and_publish_on_mqtt(self):
         for point in SensorModel.get_all():
