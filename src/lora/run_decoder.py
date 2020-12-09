@@ -14,9 +14,11 @@ def run_decoder(droplet: LoRaV1DropletDecoder, droplet_list):
             if droplet.decode_id() in droplet_list:
                 payload = droplet.decode_all()
             else:
-                logger.warning("Doesn't match droplet_list {} {}".format(droplet_list, droplet.decode_id()))
+                logger.warning(
+                    "Doesn't match id {} on droplet_list {}".format(droplet.decode_id(), list(droplet_list.keys())))
         else:
-            logger.warning("Failure on check_sensor_type {} {}".format(droplet.check_payload_len(), droplet.decode_id()))
+            logger.warning(
+                "Failure on check_sensor_type {} {}".format(droplet.check_payload_len(), droplet.decode_id()))
     else:
         logger.warning("Failure on check_payload_len {}".format(droplet.check_payload_len()))
     return payload

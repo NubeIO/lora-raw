@@ -122,7 +122,7 @@ class SerialConnectionListener:
                 if not self.__connection:
                     raise Exception("Can't read and store value with closed connection")
                 line = self.__connection.readline().rstrip()
-                logger.info("RAW DATA READ FROM SERIAL: {}".format(line))
+                logger.debug("Raw data read from serial: {}".format(line))
                 if line != b'':
                     data = line.decode('utf-8')
                     logger.debug("pre_clean_data {}".format({"pre_clean_data": data, "data_len": len(data)}))
@@ -132,7 +132,7 @@ class SerialConnectionListener:
                     logger.debug("after clean {}".format(
                         {"after_clean_data": data, "data_len": len(data), "check_len": droplet.check_payload_len()}))
                     payload = run_decoder(droplet, DropletsRegistry.get_instance().get_droplets())
-                    logger.debug("MQTT PAYLOAD {}".format(payload))
+                    logger.debug("MQTT payload {}".format(payload))
                     if payload is not None:
                         uuid = DropletsRegistry.get_instance().get_uuid_from_droplets(droplet.decode_id())
                         SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
