@@ -123,6 +123,7 @@ class SerialConnectionListener:
                 if not self.__connection:
                     raise Exception("Can't read and store value with closed connection")
                 line = self.__connection.readline().rstrip()
+                logger.info("RAW DATA READ FROM SERIAL: {}".format(line))
                 if line != b'':
                     data = line.decode('utf-8')
                     logger.debug("pre_clean_data {}".format({"pre_clean_data": data, "data_len": len(data)}))
