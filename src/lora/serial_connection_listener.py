@@ -77,7 +77,8 @@ class SerialConnectionListener:
             self.__read_and_store_value()
         except Exception as e:
             self.__connection = None
-            logging.error(f'Error: {str(e)}')
+            logging.error("Error: {}".format(str(e)))
+            #   logging.error(f'Error: {str(e)}')
 
     def __sync_droplets_and_publish_on_mqtt(self):
         for point in SensorModel.get_all():
@@ -122,6 +123,7 @@ class SerialConnectionListener:
                 if not self.__connection:
                     raise Exception("Can't read and store value with closed connection")
                 line = self.__connection.readline().rstrip()
+                logger.info("RAW DATA READ FROM SERIAL: {}".format(line))
                 if line != b'':
                     data = line.decode('utf-8')
                     logger.debug("pre_clean_data {}".format({"pre_clean_data": data, "data_len": len(data)}))

@@ -30,7 +30,7 @@ class SensorName(SensorBase):
         data = SensorName.parser_patch.parse_args()
         sensor = SensorModel.find_by_object_name(object_name)
         if sensor is None:
-            abort(404, message=f"Does not exist {object_name}")
+            abort(404, message="Does not exist {}".format(object_name))
         try:
             non_none_data = {}
             for key in data.keys():

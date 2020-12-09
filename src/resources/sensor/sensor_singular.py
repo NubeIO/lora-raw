@@ -31,7 +31,7 @@ class SensorSingular(SensorBase):
         data = SensorSingular.parser_patch.parse_args()
         sensor = SensorModel.find_by_uuid(uuid)
         if sensor is None:
-            abort(404, message=f"Does not exist {uuid}")
+            abort(404, message="Does not exist {}".format(uuid))
         try:
             non_none_data = {}
             for key in data.keys():
