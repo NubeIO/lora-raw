@@ -1,6 +1,19 @@
 # lora-raw
 
 
+### Running on Production
+
+#### One time setup:
+- Clone [this](https://github.com/NubeIO/common-py-libs)
+- Create `venv` on inside that directory (follow instruction on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+
+#### Commands:
+```bash
+sudo bash script.bash start -service_name=<service_name> -u=<pi|debian> -dir=<working_dir> -lib_dir=<common-py-libs-dir> -data_dir=<data_dir> -p=<port>
+sudo bash script.bash start -service_name=nubeio-lora-raw.service -u=pi -dir=/home/pi/lora-raw -lib_dir=/home/pi/common-py-libs -data_dir=/data/lora-raw -p=1919
+sudo bash script.bash -h
+```
+
 
 ```
 git clone --depth 1 https://github.com/NubeIO/lora-raw
