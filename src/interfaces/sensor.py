@@ -11,7 +11,7 @@ class SensorModelType(enum.Enum):
     MICRO_EDGE = 1
     DROPLET_TH = 2
     DROPLET_THL = 3
-    DROPLET_THML = 4
+    DROPLET_THLM = 4
 
 
 class MicroEdgeInputType(enum.Enum):

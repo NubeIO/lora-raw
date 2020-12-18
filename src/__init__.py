@@ -5,9 +5,17 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine.base import Engine
 
-logging.config.fileConfig('logging/logging.conf')
+if os.environ.get("data_dir") is None:
+    logging_file = 'logging/logging.conf'
+else:
+    logging_file = os.path.join(os.environ.get("data_dir"), 'logging.conf')
+try:
+    logging.config.fileConfig(logging_file)
+except Exception as e:
+    raise Exception(f'Failed to load logging config file {logging_file}. '
+                    f'Assure the example config is cloned as logging.conf')
 
 app = Flask(__name__)
 CORS(app)

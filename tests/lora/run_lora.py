@@ -102,7 +102,7 @@ while True:
             log.info("after clean {}".format(
                 {"after_clean_data": data, "data_len": len(data), "check_len": droplet.check_payload_len()}))
             data_length = droplet.data_len()
-            sensorType = 'droplet'
+            sensorType = 'device'
             droplet_list = config_sensor_list
             log.info("droplet_list{}".format(droplet_list))
             payload = run_decoder(droplet, droplet_list)

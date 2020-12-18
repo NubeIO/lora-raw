@@ -7,7 +7,7 @@ from src.resources.sensor.sensor_base import SensorBase
 
 class SensorName(SensorBase):
     parser_patch = reqparse.RequestParser()
-    parser_patch.add_argument('address', type=int)
+    parser_patch.add_argument('name', type=str)
     parser_patch.add_argument('sensor_type', type=str)
     parser_patch.add_argument('sensor_model', type=str)
     parser_patch.add_argument('micro_edge_input_type', type=str)
@@ -19,18 +19,18 @@ class SensorName(SensorBase):
     parser_patch.add_argument('data_offset', type=float)
 
     @marshal_with(sensor_fields)
-    def get(self, object_name):
-        sensor = SensorModel.find_by_object_name(object_name)
+    def get(self, name):
+        sensor = SensorModel.find_by_name(name)
         if not sensor:
             abort(404, message='LoRa Sensor is not found')
         return sensor
 
     @marshal_with(sensor_fields)
-    def patch(self, object_name):
+    def patch(self, name):
         data = SensorName.parser_patch.parse_args()
-        sensor = SensorModel.find_by_object_name(object_name)
+        sensor = SensorModel.find_by_name(name)
         if sensor is None:
-            abort(404, message="Does not exist {}".format(object_name))
+            abort(404, message="Does not exist {}".format(name))
         try:
             non_none_data = {}
             for key in data.keys():

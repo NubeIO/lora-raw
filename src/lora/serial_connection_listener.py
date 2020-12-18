@@ -2,13 +2,13 @@ import logging
 import time
 from threading import Thread
 
+import serial.tools.list_ports
 from serial import Serial
 
-from src.ini_config import settings__enable_mqtt, mqtt__publish_value, mqtt__attempt_reconnect_secs
-from src.lora.clean_payload import CleanPayload
-from src.lora.decoder import LoRaV1DropletDecoder
-from src.lora.droplet_registry import DropletsRegistry
-from src.lora.run_decoder import run_decoder
+from src.ini_config import settings__enable_mqtt, mqtt__attempt_reconnect_secs
+from src.lora.decoders.decoder import DecoderFactory
+from src.lora.decoders.decoder_base import DecoderBase
+from src.lora.device_registry import DeviceRegistry
 from src.models.model_sensor import SensorModel
 from src.models.model_sensor_store import SensorStoreModel
 from src.models.model_serial import SerialDriverModel
@@ -26,9 +26,8 @@ class SerialConnectionListener:
             raise Exception("SerialConnectionListener class is a singleton class!")
         else:
             self.__connection = None
-            self.__loop = True
-            self.__is_running = False
             self.__serial_driver = None
+            self.__new_serial_driver = None
             SerialConnectionListener.__instance = self
 
     @staticmethod
@@ -42,70 +41,61 @@ class SerialConnectionListener:
 
     def start(self):
         serial_driver = SerialDriverModel.create_default_server_if_does_not_exist()
-        self.__start_thread(serial_driver)
+        self.__serial_driver = serial_driver
+        self.__start_thread()
 
-    def restart(self, new_serial_driver, thread=True):
+    def restart(self, new_serial_driver):
+        self.__new_serial_driver = new_serial_driver
         logger.info("Restarting the serial driver...")
-        if self.status():
-            logger.info('Closing old connection...')
-            self.__loop = False
-            while self.__is_running:
-                time.sleep(1)
-            self.__connection.close()
-        if thread:
-            self.__start_thread(new_serial_driver, False)
-        else:
-            self.__start(new_serial_driver, False)
 
-    def __start_thread(self, serial_driver, sync_droplets_and_publish_on_mqtt=True):
-        SerialConnectionListener.__thread = Thread(target=self.__start,
-                                                   daemon=True,
-                                                   args=(serial_driver, sync_droplets_and_publish_on_mqtt))
+    def __start_thread(self):
+        SerialConnectionListener.__thread = Thread(target=self.__start, daemon=True)
         SerialConnectionListener.__thread.start()
 
-    def __start(self, serial_driver, sync_droplets_and_publish_on_mqtt):
+    def __start(self):
         try:
-            self.__connect(serial_driver)
-            if sync_droplets_and_publish_on_mqtt:
-                if settings__enable_mqtt and mqtt__publish_value:
-                    while not MqttClient.get_instance().status():
-                        logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
-                        time.sleep(mqtt__attempt_reconnect_secs)
-                logger.info("MQTT is connected successfully for publishing values...")
-                self.__sync_droplets_and_publish_on_mqtt()
-            self.__serial_driver = serial_driver
+            self.__connect()
+            if settings__enable_mqtt:
+                time.sleep(1)  # time for mqtt client to connect
+                while not MqttClient.get_instance().status():
+                    logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
+                    time.sleep(mqtt__attempt_reconnect_secs)
+                logger.info("MQTT client connected. Resuming...")
+            self.__sync_devices()
             self.__read_and_store_value()
         except Exception as e:
             self.__connection = None
             logging.error("Error: {}".format(str(e)))
 
-    def __sync_droplets_and_publish_on_mqtt(self):
+    def __sync_devices(self):
         for point in SensorModel.get_all():
-            DropletsRegistry.get_instance().add_droplet(point.object_name, point.uuid)
+            DeviceRegistry.get_instance().add_device(point.device_id, point.uuid)
             point_store = point.sensor_store
-            MqttClient.publish_mqtt_value(point.object_name, {
-                "pressure": point_store.pressure,
-                "temp": point_store.temp,
-                "humidity": point_store.humidity,
-                "voltage": point_store.voltage,
-                "rssi": point_store.rssi,
-                "snr": point_store.snr,
-            })
+            if settings__enable_mqtt:
+                # TODO: move this and publish other sensor values
+                MqttClient.publish_mqtt_value(point.name, {
+                    "pressure": point_store.pressure,
+                    "temp": point_store.temp,
+                    "humidity": point_store.humidity,
+                    "voltage": point_store.voltage,
+                    "rssi": point_store.rssi,
+                    "snr": point_store.snr,
+                })
 
-    def __connect(self, serial_driver: SerialDriverModel):
+    def __connect(self):
         self.__connection = Serial()
-        self.__connection.port = serial_driver.port
-        self.__connection.baudrate = serial_driver.baud_rate
-        self.__connection.stopbits = serial_driver.stop_bits
-        self.__connection.timeout = serial_driver.timeout
-        self.__connection.parity = serial_driver.parity.name
+        self.__connection.port = self.__serial_driver.port
+        self.__connection.baudrate = self.__serial_driver.baud_rate
+        self.__connection.stopbits = self.__serial_driver.stop_bits
+        self.__connection.timeout = self.__serial_driver.timeout
+        self.__connection.parity = self.__serial_driver.parity.name
         try:
             self.__connection.open()
-            logger.info("Worked to open serial port {}!".format(serial_driver.port))
+            logger.info("Serial port {} opened!".format(self.__serial_driver.port))
+            return
         except:
             self.__connection = None
-            logger.error("Failed to open serial port {}!".format(serial_driver.port))
-            import serial.tools.list_ports
+            logger.error("Failed to open serial port {}".format(self.__serial_driver.port))
             ports = serial.tools.list_ports.comports()
             logger.info("Available serial ports are:")
             i = 0
@@ -114,33 +104,42 @@ class SerialConnectionListener:
                 logger.info("{}. {}: {}".format(i, port, desc))
 
     def __read_and_store_value(self):
-        self.__loop = True
-        self.__is_running = True
-
-        while self.__loop:
+        while True:
+            if self.__serial_driver != self.__new_serial_driver and self.__new_serial_driver:
+                # when restart occurs
+                self.__serial_driver = self.__new_serial_driver
+                self.__start()
             try:
                 if not self.__connection:
-                    raise Exception("Can't read and store value with closed connection")
-                line = self.__connection.readline().rstrip()
-                logger.debug("Raw data read from serial: {}".format(line))
-                if line != b'':
-                    data = line.decode('utf-8')
-                    logger.debug("pre_clean_data {}".format({"pre_clean_data": data, "data_len": len(data)}))
-                    data = CleanPayload(data)
-                    data = data.clean_data()
-                    droplet = LoRaV1DropletDecoder(data)
-                    logger.debug("after clean {}".format(
-                        {"after_clean_data": data, "data_len": len(data), "check_len": droplet.check_payload_len()}))
-                    payload = run_decoder(droplet, DropletsRegistry.get_instance().get_droplets())
-                    logger.debug("MQTT payload {}".format(payload))
+                    raise Exception('Connection not established')
+                data = self.__connection.readline().strip().decode('utf-8')
+                self.__store_value(data)
+            except Exception as e:
+                logger.error(str(e))
+                if self.__connection:
+                    self.__connection.close()
+                    self.__connection = None
+                time.sleep(5)
+                # retry when reading got failed (unplugging device, device port un-match etc.)
+                self.__start()
+
+    def __store_value(self, data):
+        if data and DecoderBase.check_payload_len(data):
+            logger.debug("   payload: {} length: {}".format(data, len(data)))
+            decoder = DecoderFactory.get_decoder(data)
+            if decoder is None:
+                logger.warning('No decoder found... Continuing')
+            else:
+                sensor_id = decoder.decode_id()
+                if sensor_id in DeviceRegistry.get_instance().get_devices():
+                    payload = decoder.decode()
+                    logger.debug('    Sensor payload: {}'.format(payload))
                     if payload is not None:
-                        uuid = DropletsRegistry.get_instance().get_uuid_from_droplets(droplet.decode_id())
+                        uuid = DeviceRegistry.get_instance().get_uuid_from_devices(sensor_id)
                         SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
                         SensorStoreModel.commit()
-                        MqttClient.publish_mqtt_value(droplet.decode_id(), payload)
-            except Exception as e:
-                self.__connection = None
-                logger.error("{}".format(e))
-                time.sleep(5)
-                self.restart(self.__serial_driver, False)
-        self.__is_running = False
+                        MqttClient.publish_mqtt_value(sensor_id, payload)
+                else:
+                    logger.warning('      Sensor not in registry: {}'.format(sensor_id))
+        elif data:
+            logger.debug("Raw serial: {}".format(data))

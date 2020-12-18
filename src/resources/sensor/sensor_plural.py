@@ -8,7 +8,7 @@ from src.resources.sensor.sensor_base import SensorBase
 
 
 class SensorPlural(SensorBase):
-    @marshal_with(sensor_fields, envelope="sensors")
+    @marshal_with(sensor_fields)
     def get(self):
         return SensorModel.get_all()
 

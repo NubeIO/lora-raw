@@ -1,14 +1,14 @@
 from flask_restful import Resource, reqparse, abort
 
 from src import db
-from src.lora.droplet_registry import DropletsRegistry
+from src.lora.device_registry import DeviceRegistry
 from src.models.model_sensor import SensorModel
 
 
 class SensorBase(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('object_name', type=str, required=True)
-    parser.add_argument('address', type=int, required=True)
+    parser.add_argument('name', type=str, required=True)
+    parser.add_argument('id', type=str, required=True, dest='device_id')
     parser.add_argument('sensor_type', type=str, required=True)
     parser.add_argument('sensor_model', type=str, required=True)
     parser.add_argument('micro_edge_input_type', type=str, required=True)
@@ -31,5 +31,5 @@ class SensorBase(Resource):
         SensorModel.filter_by_uuid(uuid).update(data)
         db.session.commit()
         sensor_return = SensorModel.find_by_uuid(uuid)
-        DropletsRegistry.get_instance().add_droplet(sensor_return.object_name, uuid)
+        DeviceRegistry.get_instance().add_device(sensor_return.name, uuid)
         return sensor_return

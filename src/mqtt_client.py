@@ -60,10 +60,10 @@ class MqttClient:
         retain = mqtt__retain
         if not MqttClient.get_instance().status():
             logger.error("MQTT is not connected...")
-            logging.error(
+            logger.error(
                 "Failed MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, retain))
             return
-        logging.debug("MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, retain))
+        logger.debug("MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, retain))
         MqttClient.__client.publish(topic, str(payload), qos=mqtt__qos, retain=retain)
 
     @staticmethod

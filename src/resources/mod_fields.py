@@ -19,8 +19,8 @@ sensor_store_fields = {
 
 sensor_fields = {
     'uuid': fields.String,
-    'object_name': fields.String,
-    'address': fields.Integer,
+    'name': fields.String,
+    'id': fields.String(8, attribute='device_id'),
 
     'sensor_type': fields.String(attribute="sensor_type.name"),
     'sensor_model': fields.String(attribute="sensor_model.name"),

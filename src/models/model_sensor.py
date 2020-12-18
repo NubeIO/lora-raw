@@ -1,6 +1,6 @@
 from src import db
-from src.interfaces.sensor.sensor import SensorType, SensorModelType, MicroEdgeInputType
-from src.lora.droplet_registry import DropletsRegistry
+from src.interfaces.sensor import SensorType, SensorModelType, MicroEdgeInputType
+from src.lora.device_registry import DeviceRegistry
 from src.models.model_base import ModelBase
 from src.models.model_sensor_store import SensorStoreModel
 
@@ -9,8 +9,8 @@ class SensorModel(ModelBase):
     __tablename__ = 'sensors'
 
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
-    object_name = db.Column(db.String(80), nullable=False, unique=True)
-    address = db.Column(db.Integer, nullable=False, unique=True)
+    name = db.Column(db.String(80), nullable=False, unique=True)
+    device_id = db.Column(db.String(8), nullable=False, unique=True)
 
     sensor_type = db.Column(db.Enum(SensorType), nullable=False)
     sensor_model = db.Column(db.Enum(SensorModelType), nullable=False)
@@ -38,34 +38,30 @@ class SensorModel(ModelBase):
         return cls.query.all()
 
     @classmethod
-    def find_by_uuid(cls, uuid):
-        return cls.query.filter_by(uuid=uuid).first()
-
-    @classmethod
     def filter_by_uuid(cls, uuid):
         return cls.query.filter_by(uuid=uuid)
 
     @classmethod
-    def find_by_object_id(cls, object_type, address):
-        return cls.query.filter((SensorModel.object_type == object_type) & (SensorModel.address == address)).first()
+    def find_by_uuid(cls, uuid):
+        return cls.query.filter_by(uuid=uuid).first()
 
     @classmethod
-    def find_by_object_name(cls, object_name):
-        return cls.query.filter(SensorModel.object_name == object_name).first()
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
 
     @classmethod
     def delete_all_from_db(cls):
         cls.query.delete()
         db.session.commit()
-        DropletsRegistry.get_instance().remove_all_droplets()
+        DeviceRegistry.get_instance().remove_all_devices()
 
     def save_to_db(self):
         self.sensor_store = SensorStoreModel.create_new_sensor_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
-        DropletsRegistry.get_instance().add_droplet(self.object_name, self.uuid)
+        DeviceRegistry.get_instance().add_device(self.device_id, self.uuid)
 
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-        DropletsRegistry.get_instance().remove_droplet(self.object_name)
+        DeviceRegistry.get_instance().remove_device(self.device_id)

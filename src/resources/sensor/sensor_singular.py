@@ -7,8 +7,7 @@ from src.resources.sensor.sensor_base import SensorBase
 
 class SensorSingular(SensorBase):
     parser_patch = reqparse.RequestParser()
-    parser_patch.add_argument('object_name', type=str)
-    parser_patch.add_argument('address', type=int)
+    parser_patch.add_argument('name', type=str)
     parser_patch.add_argument('sensor_type', type=str)
     parser_patch.add_argument('sensor_model', type=str)
     parser_patch.add_argument('micro_edge_input_type', type=str)

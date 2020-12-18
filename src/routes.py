@@ -7,11 +7,14 @@ from src.resources.sensor.sensor_plural import SensorPlural
 from src.resources.sensor.sensor_singular import SensorSingular
 from src.resources.serial_driver.serial import SerialDriver
 
-api_prefix = 'api'
+api_prefix = '/api'
 api = Api(app)
 
-api.add_resource(SerialDriver, '/{}/lora/port'.format(api_prefix))
-api.add_resource(SensorPlural, '/{}/lora/sensors'.format(api_prefix))
-api.add_resource(SensorSingular, '/{}/lora/sensors/uuid/<string:uuid>'.format(api_prefix))
-api.add_resource(SensorName, '/{}/lora/sensors/name/<string:object_name>'.format(api_prefix))
-api.add_resource(Ping, '/{}/system/ping'.format(api_prefix))
+lora_api_prefix = '{}/lora'.format(api_prefix)
+api.add_resource(SerialDriver, '{}/networks'.format(lora_api_prefix))
+api.add_resource(SensorPlural, '{}/devices'.format(lora_api_prefix))
+api.add_resource(SensorSingular, '{}/devices/uuid/<string:uuid>'.format(lora_api_prefix))
+api.add_resource(SensorName, '{}/devices/name/<string:name>'.format(lora_api_prefix))
+
+system_api_prefix = '{}/system'.format(api_prefix)
+api.add_resource(Ping, system_api_prefix, '{}/ping'.format(system_api_prefix))
