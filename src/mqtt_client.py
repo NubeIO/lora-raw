@@ -55,8 +55,11 @@ class MqttClient:
         MqttClient.__client.loop_forever()
 
     @staticmethod
-    def publish_mqtt_value(object_name, payload: dict):
-        topic = "{}/{}".format(mqtt__topic, object_name)
+    def get_topic(name):
+        return "{}/{}".format(mqtt__topic, name)
+
+    @staticmethod
+    def publish_mqtt_value(topic, payload: dict):
         retain = mqtt__retain
         if not MqttClient.get_instance().status():
             logger.error("MQTT is not connected...")

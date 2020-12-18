@@ -69,18 +69,11 @@ class SerialConnectionListener:
 
     def __sync_devices(self):
         for point in SensorModel.get_all():
-            DeviceRegistry.get_instance().add_device(point.device_id, point.uuid)
+            DeviceRegistry.get_instance().add_device(point.device_id, point.uuid, point.name)
             point_store = point.sensor_store
             if settings__enable_mqtt:
-                # TODO: move this and publish other sensor values
-                MqttClient.publish_mqtt_value(point.name, {
-                    "pressure": point_store.pressure,
-                    "temp": point_store.temp,
-                    "humidity": point_store.humidity,
-                    "voltage": point_store.voltage,
-                    "rssi": point_store.rssi,
-                    "snr": point_store.snr,
-                })
+                topic = MqttClient.get_topic(point.name)
+                MqttClient.publish_mqtt_value(topic, point_store.get_value())
 
     def __connect(self):
         self.__connection = Serial()
@@ -130,16 +123,18 @@ class SerialConnectionListener:
             if decoder is None:
                 logger.warning('No decoder found... Continuing')
             else:
-                sensor_id = decoder.decode_id()
-                if sensor_id in DeviceRegistry.get_instance().get_devices():
+                device_id = decoder.decode_id()
+                devices = DeviceRegistry.get_instance().get_devices()
+                if device_id in devices:
                     payload = decoder.decode()
                     logger.debug('    Sensor payload: {}'.format(payload))
                     if payload is not None:
-                        uuid = DeviceRegistry.get_instance().get_uuid_from_devices(sensor_id)
+                        (uuid, name) = DeviceRegistry.get_instance().get_device(device_id)
                         SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
                         SensorStoreModel.commit()
-                        MqttClient.publish_mqtt_value(sensor_id, payload)
+                        topic = MqttClient.get_topic(name)
+                        MqttClient.publish_mqtt_value(topic, payload)
                 else:
-                    logger.warning('      Sensor not in registry: {}'.format(sensor_id))
+                    logger.warning('      Sensor not in registry: {}'.format(device_id))
         elif data:
             logger.debug("Raw serial: {}".format(data))

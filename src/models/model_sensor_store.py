@@ -31,3 +31,19 @@ class SensorStoreModel(ModelBase):
     @classmethod
     def create_new_sensor_store_model(cls, sensor_uuid):
         return SensorStoreModel(sensor_uuid=sensor_uuid)
+
+    def get_value(self):
+        return {
+            "pressure": self.pressure,
+            "temp": self.temp,
+            "humidity": self.humidity,
+            "voltage": self.voltage,
+            "rssi": self.rssi,
+            "snr": self.snr,
+            "lux": self.lux,
+            "movement": self.movement,
+            "micro_edge_pulse_count": self.micro_edge_pulse_count,
+            "micro_edge_A1": self.micro_edge_A1,
+            "micro_edge_A2": self.micro_edge_A2,
+            "micro_edge_A3": self.micro_edge_A3,
+        }
