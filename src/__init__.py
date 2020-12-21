@@ -7,6 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from sqlalchemy.engine.base import Engine
 
+from src.custom_logger import CustomLogger
+
+logging.setLoggerClass(CustomLogger)
+
 if os.environ.get("data_dir") is None:
     logging_file = 'logging/logging.conf'
 else:
