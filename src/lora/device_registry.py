@@ -17,11 +17,13 @@ class DeviceRegistry:
     def get_devices(self):
         return self.__devices
 
-    def get_uuid_from_devices(self, device):
-        return self.__devices[device]
+    def get_device(self, device) -> tuple:
+        if self.__devices[device]:
+            return self.__devices[device]
+        return None, None
 
-    def add_device(self, device, uuid):
-        self.__devices[device] = uuid
+    def add_device(self, device, uuid, name):
+        self.__devices[device] = uuid, name
 
     def remove_device(self, device):
         self.__devices.pop(device, None)

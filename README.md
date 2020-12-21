@@ -9,8 +9,9 @@
 
 #### Commands:
 ```bash
-sudo bash script.bash start -service_name=<service_name> -u=<pi|debian> -dir=<working_dir> -lib_dir=<common-py-libs-dir> -data_dir=<data_dir> -p=<port>
-sudo bash script.bash start -service_name=nubeio-lora-raw.service -u=pi -dir=/home/pi/lora-raw -lib_dir=/home/pi/common-py-libs -data_dir=/data/lora-raw -p=1919
+sudo bash script.bash start -s=<service_name> -u=<pi|debian> --dir=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> -p=<port>
+sudo bash script.bash start -s=nubeio-lora-raw.service -u=pi --dir=/home/pi/lora-raw --lib-dir=/home/pi/common-py-libs --data-dir=/data/lora-raw -p=1919
+sudo bash script.bash delete
 sudo bash script.bash -h
 ```
 
@@ -39,5 +40,4 @@ sudo systemctl status nubeio-lora-raw.service
 sudo systemctl start nubeio-lora-raw.service
 sudo systemctl stop nubeio-lora-raw.service
 sudo systemctl restart nubeio-lora-raw.service
-
 ```

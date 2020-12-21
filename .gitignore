@@ -137,3 +137,6 @@ dmypy.json
 
 # Local database
 data.db
+
+# logging conf
+logging.conf
