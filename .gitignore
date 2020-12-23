@@ -137,6 +137,9 @@ dmypy.json
 
 # Local database
 data.db
+out/*
+!out/.gitkeep
 
-# logging conf
-logging.conf
+!docker/.env
+
+*.iml
