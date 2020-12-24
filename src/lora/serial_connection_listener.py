@@ -1,13 +1,10 @@
 from logging import Logger
-from threading import Thread
 
 import serial.tools.list_ports
 import time
-from flask import current_app
 from serial import Serial
-from werkzeug.local import LocalProxy
 
-from src.app import SerialSetting
+from src import SerialSetting, FlaskThread
 from src.lora import DeviceRegistry
 from src.lora.decoders.decoder import DecoderFactory
 from src.lora.decoders.decoder_base import DecoderBase
@@ -16,8 +13,6 @@ from src.models.model_sensor_store import SensorStoreModel
 from src.models.model_serial import SerialDriverModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
-
-logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
 
 
 class SerialConnectionListener(metaclass=Singleton):
@@ -28,21 +23,23 @@ class SerialConnectionListener(metaclass=Singleton):
         self.__connection = None
         self.__serial_driver = None
         self.__new_serial_driver = None
+        self.logger = None
 
     def status(self):
         return self.__connection is not None
 
-    def start(self, config: SerialSetting):
+    def start(self, config: SerialSetting, logger: Logger):
+        self.logger = logger or Logger(__name__)
         self.__config = config
         self.__serial_driver = SerialDriverModel.create_default_server_if_does_not_exist(self.__config)
         self.__start_thread()
 
     def restart(self, new_serial_driver):
         self.__new_serial_driver = new_serial_driver
-        logger.info("Restarting the serial driver...")
+        self.logger.info("Restarting the serial driver...")
 
     def __start_thread(self):
-        SerialConnectionListener.__thread = Thread(target=self.__start, daemon=True)
+        SerialConnectionListener.__thread = FlaskThread(target=self.__start, daemon=True)
         SerialConnectionListener.__thread.start()
 
     def __start(self):
@@ -52,14 +49,14 @@ class SerialConnectionListener(metaclass=Singleton):
             if mqttc.config.enabled:
                 time.sleep(1)  # time for mqtt client to connect
                 while not mqttc.status():
-                    logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
+                    self.logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
                     time.sleep(mqttc.config.attempt_reconnect_secs)
-                logger.info("MQTT client connected. Resuming...")
+                self.logger.info("MQTT client connected. Resuming...")
             self.__sync_devices()
             self.__read_and_store_value()
         except Exception as e:
             self.__connection = None
-            logger.error("Error: {}".format(str(e)))
+            self.logger.error("Error: {}".format(str(e)))
 
     def __sync_devices(self):
         mqttc = MqttClient()
@@ -79,17 +76,17 @@ class SerialConnectionListener(metaclass=Singleton):
         self.__connection.parity = self.__serial_driver.parity.name
         try:
             self.__connection.open()
-            logger.info("Serial port {} opened!".format(self.__serial_driver.port))
+            self.logger.info("Serial port {} opened!".format(self.__serial_driver.port))
             return
         except:
             self.__connection = None
-            logger.error("Failed to open serial port {}".format(self.__serial_driver.port))
+            self.logger.error("Failed to open serial port {}".format(self.__serial_driver.port))
             ports = serial.tools.list_ports.comports()
-            logger.info("Available serial ports are:")
+            self.logger.info("Available serial ports are:")
             i = 0
             for port, desc, _ in sorted(ports):
                 i += 1
-                logger.info("{}. {}: {}".format(i, port, desc))
+                self.logger.info("{}. {}: {}".format(i, port, desc))
 
     def __read_and_store_value(self):
         while True:
@@ -103,7 +100,7 @@ class SerialConnectionListener(metaclass=Singleton):
                 data = self.__connection.readline().strip().decode('utf-8')
                 self.__store_value(data)
             except Exception as e:
-                logger.error(str(e))
+                self.logger.error(str(e))
                 if self.__connection:
                     self.__connection.close()
                     self.__connection = None
@@ -113,16 +110,16 @@ class SerialConnectionListener(metaclass=Singleton):
 
     def __store_value(self, data):
         if data and DecoderBase.check_payload_len(data):
-            logger.debug("   payload: {} length: {}".format(data, len(data)))
+            self.logger.debug("   payload: {} length: {}".format(data, len(data)))
             decoder = DecoderFactory.get_decoder(data)
             if decoder is None:
-                logger.warning('No decoder found... Continuing')
+                self.logger.warning('No decoder found... Continuing')
             else:
                 device_id = decoder.decode_id()
                 devices = DeviceRegistry().get_devices()
                 if device_id in devices:
                     payload = decoder.decode()
-                    logger.debug('    Sensor payload: {}'.format(payload))
+                    self.logger.debug('    Sensor payload: {}'.format(payload))
                     if payload is not None:
                         (uuid, name) = DeviceRegistry().get_device(device_id)
                         SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
@@ -130,6 +127,6 @@ class SerialConnectionListener(metaclass=Singleton):
                         mqttc = MqttClient()
                         mqttc.publish_mqtt_value(mqttc.get_topic(name), payload)
                 else:
-                    logger.warning('      Sensor not in registry: {}'.format(device_id))
+                    self.logger.warning('      Sensor not in registry: {}'.format(device_id))
         elif data:
-            logger.debug("Raw serial: {}".format(data))
+            self.logger.debug("Raw serial: {}".format(data))

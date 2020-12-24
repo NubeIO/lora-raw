@@ -1,6 +1,6 @@
 import uuid
 
-from src.app import db, SerialSetting
+from src import db, SerialSetting
 from src.interfaces.serial_network import ModbusRtuParity
 from src.models.model_base import ModelBase
 
