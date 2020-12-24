@@ -88,7 +88,7 @@ startNewLinuxService() {
     sudo systemctl restart ${SERVICE_NAME}
 }
 
-start() {
+install() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]; then
         createDirIfNotExist
         copyConfigurationIfNotExist
