@@ -2,18 +2,15 @@ from logging import Logger
 
 import paho.mqtt.client as mqtt_client
 import time
-from flask import current_app
-from werkzeug.local import LocalProxy
 
-from src.app import MqttSetting
+from src import MqttSetting
 from src.utils import Singleton
-
-logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
 
 
 class MqttClient(metaclass=Singleton):
 
     def __init__(self):
+        self.logger = None
         self.__config = None
         self.__client = None
 
@@ -24,7 +21,8 @@ class MqttClient(metaclass=Singleton):
     def status(self) -> bool:
         return self.__client.is_connected() if self.config and self.config.enabled and self.__client else False
 
-    def start(self, config: MqttSetting):
+    def start(self, config: MqttSetting, logger: Logger):
+        self.logger = logger or Logger(__name__)
         self.__config = config
         self.__client = mqtt_client.Client(self.config.name)
         self.__client.on_connect = self.__on_connect
@@ -34,7 +32,7 @@ class MqttClient(metaclass=Singleton):
                     self.__client.connect(config.host, config.port, config.keepalive)
                     break
                 except ConnectionRefusedError:
-                    logger.error('MQTT connection failure: ConnectionRefusedError. \
+                    self.logger.error('MQTT connection failure: ConnectionRefusedError. \
                                     Attempting reconnect in {} seconds'.format(config.attempt_reconnect_secs))
                     time.sleep(config.attempt_reconnect_secs)
         else:
@@ -42,7 +40,7 @@ class MqttClient(metaclass=Singleton):
                 self.__client.connect(config.host, config.port, config.keepalive)
             except Exception as e:
                 self.__client = None
-                logger.error(str(e))
+                self.logger.error(str(e))
                 return
         self.__client.loop_forever()
 
@@ -51,9 +49,9 @@ class MqttClient(metaclass=Singleton):
 
     def publish_mqtt_value(self, topic, payload):
         if not self.status():
-            logger.error("MQTT is not connected...", stacklevel=0)
+            self.logger.error("MQTT is not connected...", stacklevel=0)
             return
-        logger.debug(
+        self.logger.debug(
             "MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, self.config.retain),
             stacklevel=0)
         self.__client.publish(topic, str(payload), qos=self.config.qos, retain=self.config.retain)
