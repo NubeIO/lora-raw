@@ -19,8 +19,8 @@ else:
 try:
     logging.config.fileConfig(logging_file)
 except Exception as e:
-    raise Exception(
-        f'Failed to load logging config file {logging_file}. Assure the example config is cloned as logging.conf')
+    raise Exception('Failed to load logging config file {}. Assure the example config is cloned as logging.conf'.format(
+        logging_file))
 
 app = Flask(__name__)
 CORS(app)
