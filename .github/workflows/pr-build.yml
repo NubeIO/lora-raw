@@ -2,9 +2,11 @@ name: pull-request-build
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [ opened, synchronize, reopened, closed ]
     branches:
-      - "master"
+      - dev
+      - main
+      - master
 
 jobs:
 
@@ -56,6 +58,7 @@ jobs:
         if: ${{ steps.validateVersion.outputs.isSameVersion == 'false' }}
         run: |
           sed -i "0,/${{ steps.grepProject.outputs.cVer }}/s//${{ steps.grepProject.outputs.tVer }}/" pyproject.toml
+          echo "${{ steps.grepProject.outputs.tVer }}" > VERSION
 
       - name: GIT commit and push
         if: ${{ steps.validateVersion.outputs.isSameVersion == 'false' }}

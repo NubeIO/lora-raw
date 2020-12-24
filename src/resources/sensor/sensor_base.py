@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, abort
 
 from src import db
-from src.lora.device_registry import DeviceRegistry
+from src.lora import DeviceRegistry
 from src.models.model_sensor import SensorModel
 
 
@@ -31,5 +31,5 @@ class SensorBase(Resource):
         SensorModel.filter_by_uuid(uuid).update(data)
         db.session.commit()
         sensor_return = SensorModel.find_by_uuid(uuid)
-        DeviceRegistry.get_instance().add_device(sensor_return.name, uuid)
+        DeviceRegistry().add_device(sensor_return.name, uuid)
         return sensor_return

@@ -1,43 +1,63 @@
-# lora-raw
+# Rubix Lora Raw
 
+## Running in development
 
-### Running on Production
+- Use [`poetry`](https://github.com/python-poetry/poetry) to manage dependencies
+- Simple script to install
 
-#### One time setup:
-- Clone [this](https://github.com/NubeIO/common-py-libs)
-- Create `venv` on inside that directory (follow instruction on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+    ```bash
+    ./setup.sh
+    ```
 
-#### Commands:
+- Join `venv`
+
+    ```bash
+    poetry shell
+    ```
+
+- Build local binary
+
+    ```bash
+    poetry run pyinstaller run.py -n rubix-lora --clean --onefile --add-data VERSION:VERSION
+    ```
+
+  The output is: `dist/rubix-lora`
+
+## Docker build
+
+### Build
+
 ```bash
-sudo bash script.bash start -s=<service_name> -u=<pi|debian> --dir=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> -p=<port>
-sudo bash script.bash start -s=nubeio-lora-raw.service -u=pi --dir=/home/pi/lora-raw --lib-dir=/home/pi/common-py-libs --data-dir=/data/lora-raw -p=1919
-sudo bash script.bash delete
-sudo bash script.bash -h
+./docker.sh
 ```
 
+The output image is: `rubix-lora:dev`
 
-```
-git clone --depth 1 https://github.com/NubeIO/lora-raw
-cd lora-raw/
-# if required install python3-venv
-sudo apt-get install python3-venv -y
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-python run.py
+### Run
+
+```bash
+docker volume create rubix-lora-data
+docker run --rm -it -p 1919:1919 -v rubix-lora-data:/data --name rubix-lora rubix-lora:dev
 ```
 
+## Deploy on Production
 
+- Download release artifact
+- Review help and start
 
-```
-sudo cp systemd/nubeio-lora-raw.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl disable nubeio-lora-raw.service
-sudo systemctl enable nubeio-lora-raw.service
-sudo journalctl -f -u nubeio-lora-raw.service
-sudo systemctl status nubeio-lora-raw.service
-sudo systemctl start nubeio-lora-raw.service
-sudo systemctl stop nubeio-lora-raw.service
-sudo systemctl restart nubeio-lora-raw.service
+```bash
+$ rubix-lora -h
+Usage: rubix-lora [OPTIONS]
+
+Options:
+  -p, --port INTEGER              Port  [default: 1919]
+  -d, --data-dir PATH             Application data dir
+  --prod                          Production mode
+  -s, --setting-file TEXT         Rubix-Lora: setting ini file
+  -l, --logging-conf TEXT         Rubix-Lora: logging config file
+  --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
+  -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
+  --log-level [FATAL|ERROR|WARN|INFO|DEBUG]
+                                  Logging level
+  -h, --help                      Show this message and exit.
 ```
