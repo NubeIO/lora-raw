@@ -1,6 +1,6 @@
 from src import db
 from src.interfaces.sensor import SensorType, SensorModelType, MicroEdgeInputType
-from src.lora.device_registry import DeviceRegistry
+from src.lora import DeviceRegistry
 from src.models.model_base import ModelBase
 from src.models.model_sensor_store import SensorStoreModel
 
@@ -53,15 +53,15 @@ class SensorModel(ModelBase):
     def delete_all_from_db(cls):
         cls.query.delete()
         db.session.commit()
-        DeviceRegistry.get_instance().remove_all_devices()
+        DeviceRegistry().remove_all_devices()
 
     def save_to_db(self):
         self.sensor_store = SensorStoreModel.create_new_sensor_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
-        DeviceRegistry.get_instance().add_device(self.device_id, self.uuid)
+        DeviceRegistry().add_device(self.device_id, self.uuid)
 
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-        DeviceRegistry.get_instance().remove_device(self.device_id)
+        DeviceRegistry().remove_device(self.device_id)

@@ -1,18 +1,10 @@
-class DeviceRegistry:
-    __instance = None
+from src.utils import Singleton
+
+
+class DeviceRegistry(metaclass=Singleton):
 
     def __init__(self):
-        if DeviceRegistry.__instance:
-            raise Exception("DeviceRegistry class is a singleton class!")
-        else:
-            self.__devices = {}
-            DeviceRegistry.__instance = self
-
-    @staticmethod
-    def get_instance():
-        if DeviceRegistry.__instance is None:
-            DeviceRegistry()
-        return DeviceRegistry.__instance
+        self.__devices = {}
 
     def get_devices(self):
         return self.__devices
@@ -23,6 +15,7 @@ class DeviceRegistry:
         return None, None
 
     def add_device(self, device, uuid, name):
+        # TODO: wtf???
         self.__devices[device] = uuid, name
 
     def remove_device(self, device):
