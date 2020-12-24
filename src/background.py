@@ -1,19 +1,25 @@
-import logging
+from logging import Logger
 from threading import Thread
 
+from flask import current_app
+from werkzeug.local import LocalProxy
+
+from src.app import AppSetting
 from src.lora.serial_connection_listener import SerialConnectionListener
-from src.mqtt_client import MqttClient, settings__enable_mqtt, settings__enable_serial_driver
+from src.mqtt import MqttClient
 
-logger = logging.getLogger(__name__)
+logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
 
 
+# TODO: Should refactor to stop when receive exit code
 class Background:
     @staticmethod
     def run():
+        setting: AppSetting = current_app.config[AppSetting.KEY]
         logger.info("Running Background Task...")
-        if settings__enable_mqtt:
-            mqtt_thread = Thread(target=MqttClient.get_instance().start, daemon=True)
+        if setting.mqtt.enabled:
+            mqtt_thread = Thread(target=MqttClient().start, daemon=True, kwargs={'config': setting.mqtt})
             mqtt_thread.start()
 
-        if settings__enable_serial_driver:
-            SerialConnectionListener.get_instance().start()
+        if setting.serial.enabled:
+            SerialConnectionListener().start(setting.serial)

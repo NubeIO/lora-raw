@@ -1,7 +1,6 @@
 import uuid
 
-from src import db
-from src.ini_config import *
+from src.app import db, SerialSetting
 from src.interfaces.serial_network import ModbusRtuParity
 from src.models.model_base import ModelBase
 
@@ -31,17 +30,17 @@ class SerialDriverModel(ModelBase):
         db.session.commit()
 
     @classmethod
-    def create_default_server_if_does_not_exist(cls):
+    def create_default_server_if_does_not_exist(cls, config: SerialSetting):
         serial_driver = SerialDriverModel.find_one()
         if not serial_driver:
             uuid_ = str(uuid.uuid4())
             serial_driver = SerialDriverModel(uuid=uuid_,
-                                              name=serial__name,
-                                              port=serial__port,
-                                              baud_rate=serial__baud_rate,
-                                              stop_bits=serial__stop_bits,
-                                              parity=serial__parity,
-                                              byte_size=serial__byte_size,
-                                              timeout=serial__timeout)
+                                              name=config.name,
+                                              port=config.port,
+                                              baud_rate=config.baud_rate,
+                                              stop_bits=config.stop_bits,
+                                              parity=config.parity,
+                                              byte_size=config.byte_size,
+                                              timeout=config.timeout)
             serial_driver.save_to_db()
         return serial_driver

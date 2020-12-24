@@ -1,6 +1,6 @@
 from flask_restful import reqparse, marshal_with, Resource, abort
 
-from src.lora.serial_connection_listener import SerialConnectionListener
+from src.lora import SerialConnectionListener
 from src.models.model_serial import SerialDriverModel
 from src.resources.mod_fields import serial_driver_field
 
@@ -30,7 +30,7 @@ class SerialDriver(Resource):
             SerialDriverModel.filter_one().update(data_to_update)
             new_serial_driver = SerialDriverModel.find_one()
             SerialDriverModel.commit()
-            SerialConnectionListener.get_instance().restart(new_serial_driver)
+            SerialConnectionListener().restart(new_serial_driver)
             return new_serial_driver
         except Exception as e:
             abort(500, message=str(e))
