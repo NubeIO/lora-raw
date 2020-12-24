@@ -49,11 +49,9 @@ class MqttClient(metaclass=Singleton):
 
     def publish_mqtt_value(self, topic, payload):
         if not self.status():
-            self.logger.error("MQTT is not connected...", stacklevel=0)
             return
-        self.logger.debug(
-            "MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, self.config.retain),
-            stacklevel=0)
+        self.logger.debug("MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload,
+                                                                                          self.config.retain))
         self.__client.publish(topic, str(payload), qos=self.config.qos, retain=self.config.retain)
 
     def publish_log(self, payload):
