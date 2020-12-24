@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from sqlalchemy.engine.base import Engine
 
-from src.custom_logger import CustomLogger
+from src.utils.custom_logger import CustomLogger
 
 logging.setLoggerClass(CustomLogger)
 

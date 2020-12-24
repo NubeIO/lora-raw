@@ -1,47 +1,40 @@
-import logging
-import time
+from logging import Logger
 from threading import Thread
 
 import serial.tools.list_ports
+import time
+from flask import current_app
 from serial import Serial
+from werkzeug.local import LocalProxy
 
-from src.ini_config import settings__enable_mqtt, mqtt__attempt_reconnect_secs
+from src.app import SerialSetting
+from src.lora import DeviceRegistry
 from src.lora.decoders.decoder import DecoderFactory
 from src.lora.decoders.decoder_base import DecoderBase
-from src.lora.device_registry import DeviceRegistry
 from src.models.model_sensor import SensorModel
 from src.models.model_sensor_store import SensorStoreModel
 from src.models.model_serial import SerialDriverModel
-from src.mqtt_client import MqttClient
+from src.mqtt import MqttClient
+from src.utils import Singleton
 
-logger = logging.getLogger(__name__)
+logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
 
 
-class SerialConnectionListener:
-    __instance = None
+class SerialConnectionListener(metaclass=Singleton):
     __thread = None
 
     def __init__(self):
-        if SerialConnectionListener.__instance:
-            raise Exception("SerialConnectionListener class is a singleton class!")
-        else:
-            self.__connection = None
-            self.__serial_driver = None
-            self.__new_serial_driver = None
-            SerialConnectionListener.__instance = self
-
-    @staticmethod
-    def get_instance():
-        if SerialConnectionListener.__instance is None:
-            SerialConnectionListener()
-        return SerialConnectionListener.__instance
+        self.__config = None
+        self.__connection = None
+        self.__serial_driver = None
+        self.__new_serial_driver = None
 
     def status(self):
         return self.__connection is not None
 
-    def start(self):
-        serial_driver = SerialDriverModel.create_default_server_if_does_not_exist()
-        self.__serial_driver = serial_driver
+    def start(self, config: SerialSetting):
+        self.__config = config
+        self.__serial_driver = SerialDriverModel.create_default_server_if_does_not_exist(self.__config)
         self.__start_thread()
 
     def restart(self, new_serial_driver):
@@ -55,25 +48,27 @@ class SerialConnectionListener:
     def __start(self):
         try:
             self.__connect()
-            if settings__enable_mqtt:
+            mqttc = MqttClient()
+            if mqttc.config.enabled:
                 time.sleep(1)  # time for mqtt client to connect
-                while not MqttClient.get_instance().status():
+                while not mqttc.status():
                     logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
-                    time.sleep(mqtt__attempt_reconnect_secs)
+                    time.sleep(mqttc.config.attempt_reconnect_secs)
                 logger.info("MQTT client connected. Resuming...")
             self.__sync_devices()
             self.__read_and_store_value()
         except Exception as e:
             self.__connection = None
-            logging.error("Error: {}".format(str(e)))
+            logger.error("Error: {}".format(str(e)))
 
     def __sync_devices(self):
+        mqttc = MqttClient()
         for point in SensorModel.get_all():
-            DeviceRegistry.get_instance().add_device(point.device_id, point.uuid, point.name)
+            DeviceRegistry().add_device(point.device_id, point.uuid, point.name)
             point_store = point.sensor_store
-            if settings__enable_mqtt:
-                topic = MqttClient.get_topic(point.name)
-                MqttClient.publish_mqtt_value(topic, point_store.get_value())
+            if mqttc.config.enabled:
+                topic = mqttc.get_topic(point.name)
+                mqttc.publish_mqtt_value(topic, point_store.get_value())
 
     def __connect(self):
         self.__connection = Serial()
@@ -124,16 +119,16 @@ class SerialConnectionListener:
                 logger.warning('No decoder found... Continuing')
             else:
                 device_id = decoder.decode_id()
-                devices = DeviceRegistry.get_instance().get_devices()
+                devices = DeviceRegistry().get_devices()
                 if device_id in devices:
                     payload = decoder.decode()
                     logger.debug('    Sensor payload: {}'.format(payload))
                     if payload is not None:
-                        (uuid, name) = DeviceRegistry.get_instance().get_device(device_id)
+                        (uuid, name) = DeviceRegistry().get_device(device_id)
                         SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
                         SensorStoreModel.commit()
-                        topic = MqttClient.get_topic(name)
-                        MqttClient.publish_mqtt_value(topic, payload)
+                        mqttc = MqttClient()
+                        mqttc.publish_mqtt_value(mqttc.get_topic(name), payload)
                 else:
                     logger.warning('      Sensor not in registry: {}'.format(device_id))
         elif data:
