@@ -59,7 +59,7 @@ class SensorModel(ModelBase):
         self.sensor_store = SensorStoreModel.create_new_sensor_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
-        DeviceRegistry.get_instance().add_device(self.device_id, self.uuid)
+        DeviceRegistry.get_instance().add_device(self.device_id, self.uuid, self.name)
 
     def delete_from_db(self):
         db.session.delete(self)

@@ -39,3 +39,10 @@ class SensorName(SensorBase):
             return self.update_sensor(sensor.uuid, non_none_data)
         except Exception as e:
             abort(500, message=str(e))
+
+    @marshal_with(sensor_fields)
+    def delete(self, name):
+        sensor = SensorModel.find_by_name(name)
+        if sensor:
+            sensor.delete_from_db()
+        return '', 204
