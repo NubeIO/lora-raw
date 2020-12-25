@@ -5,7 +5,10 @@ from src.models.model_base import ModelBase
 class SensorStoreModel(ModelBase):
     __tablename__ = 'sensors_store'
 
-    sensor_uuid = db.Column(db.String, db.ForeignKey('sensors.uuid'), primary_key=True, nullable=False)
+    sensor_uuid = db.Column(db.String,
+                            db.ForeignKey('sensors.uuid', ondelete='CASCADE'),
+                            primary_key=True,
+                            nullable=False)
     pressure = db.Column(db.Float, nullable=True)
     temp = db.Column(db.Float, nullable=True)
     humidity = db.Column(db.Float, nullable=True)
