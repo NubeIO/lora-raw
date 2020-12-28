@@ -14,6 +14,7 @@ class BaseSetting(ABC):
 
 
 class SerialSetting(BaseSetting):
+    KEY = 'serial'
 
     def __init__(self):
         self.enabled: bool = True
@@ -27,6 +28,7 @@ class SerialSetting(BaseSetting):
 
 
 class MqttSetting(BaseSetting):
+    KEY = 'mqtt'
 
     def __init__(self):
         self.enabled = True
@@ -71,9 +73,11 @@ class AppSetting:
         return self.__serial_setting
 
     def reload(self, setting_file: str, logging_file: str):
-        parser = self.__read_file(setting_file, self.__data_dir)
-        self.__mqtt_setting = self.__mqtt_setting.reload(self.__load_setting('mqtt', parser))
-        self.__serial_setting = self.__serial_setting.reload(self.__load_setting('serial', parser))
+        return self._reload(self.__read_file(setting_file, self.__data_dir))
+
+    def _reload(self, parser):
+        self.__mqtt_setting = self.__mqtt_setting.reload(self.__load_setting(MqttSetting.KEY, parser))
+        self.__serial_setting = self.__serial_setting.reload(self.__load_setting(SerialSetting.KEY, parser))
         return self
 
     def init_app(self, app: Flask):
