@@ -14,9 +14,8 @@ class DeviceRegistry(metaclass=Singleton):
             return self.__devices[device]
         return None, None
 
-    def add_device(self, device, uuid, name):
-        # TODO: wtf???
-        self.__devices[device] = uuid, name
+    def add_device(self, device, uuid):
+        self.__devices[device] = uuid
 
     def remove_device(self, device):
         self.__devices.pop(device, None)
