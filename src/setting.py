@@ -1,10 +1,19 @@
 import os
+from abc import ABC
 from configparser import ConfigParser
 
 from flask import Flask
 
 
-class SerialSetting:
+class BaseSetting(ABC):
+
+    def reload(self, setting: dict):
+        if setting is not None:
+            self.__dict__ = {k: setting.get(k, v) for k, v in self.__dict__.items()}
+        return self
+
+
+class SerialSetting(BaseSetting):
 
     def __init__(self):
         self.enabled: bool = True
@@ -16,13 +25,8 @@ class SerialSetting:
         self.byte_size = 8
         self.timeout = 5
 
-    def reload(self, setting: dict):
-        if setting is not None:
-            self.__dict__ = {k: setting[k] or v for k, v in self.__dict__.items()}
-        return self
 
-
-class MqttSetting:
+class MqttSetting(BaseSetting):
 
     def __init__(self):
         self.enabled = True
@@ -38,11 +42,6 @@ class MqttSetting:
         self.debug = True
         self.debug_topic = 'debug_lora_raw'
 
-    def reload(self, setting: dict):
-        if setting is not None:
-            self.__dict__ = {k: setting[k] or v for k, v in self.__dict__.items()}
-        return self
-
 
 class AppSetting:
     DATA_DIR_ENV = 'RUBIX_LORA_DATA'
@@ -50,8 +49,8 @@ class AppSetting:
     default_data_dir: str = 'out'
 
     def __init__(self, **kwargs):
-        self.__data_dir = self.__compute_dir(kwargs['data_dir'], AppSetting.default_data_dir)
-        self.__prod = kwargs['prod'] or False
+        self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
+        self.__prod = kwargs.get('prod') or False
         self.__mqtt_setting = MqttSetting()
         self.__serial_setting = SerialSetting()
 
