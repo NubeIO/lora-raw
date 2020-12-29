@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v1.1.0](https://github.com/NubeIO/lora-raw/tree/v1.1.0) (2020-12-29)
+
+### Added
+
+- **Breaking Changes**: Make delivery artifact as `binary`
+- Change setting file format from `.ini` to `.json`
+- Dockerize
+
 ## [v1.1.0-rc.2](https://github.com/NubeIO/lora-raw/tree/v1.1.0-rc.2) (2020-12-28)
 
 ### Changed
