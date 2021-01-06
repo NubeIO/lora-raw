@@ -1,33 +1,22 @@
+char* payloads[] = {
+    "AAB296C4E5094228BA0000EC0000009A2D64",
+    "CCB22E0BE8071D28C48E00EBA04F2FE03C64",
+    "9BB2A166E9081C28373900EA21D0CEE03C61",
+};
+const int PAYLOADS_LENGTH = sizeof(payloads) / sizeof(payloads[0]);
+
+const int DELAY_MS = 4000;
+
 void setup() {
-Serial.begin(9600);//sets the baud rate
+    Serial.begin(9600);
+    while(!Serial){}
+    delay(2000);
 }
 
 void loop() {
 
-for (int i = 0; i <= 4; i++) {
-    Serial.println("AAB296C4E5094228BA0000EC0000009A2D64");
-   delay(10);
+    for(int i = 0; i < PAYLOADS_LENGTH; i++){
+         Serial.println(payloads[i]);
+         delay(DELAY_MS);
     }
-
-delay(10000);
-for (int i = 0; i <= 1; i++) {
-    Serial.println("ADB232C688082328C32B00EBED491FD8415F");
-   delay(10);
-    }
-
-delay(10000);
-for (int i = 0; i <= 4; i++) {
-    Serial.println("CCB22E0BE8071D28C48E00EBA04F2FE03C64");
-   delay(10);
-    }
-
-delay(10000);
-
-for (int i = 0; i <= 10; i++) {
-    Serial.println("9BB2A166E9081C28373900EA21D0CEE03C61");
-   delay(10);
-    }
-
-delay(10000);
-
 }

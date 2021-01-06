@@ -31,6 +31,8 @@ class SerialSetting(BaseSetting):
         self.parity: str = 'N'
         self.byte_size = 8
         self.timeout = 5
+        self.firmware_version = 'v1'
+        self.encryption_key = ''
 
 
 class MqttSetting(BaseSetting):
@@ -53,8 +55,12 @@ class MqttSetting(BaseSetting):
 
 class AppSetting:
     DATA_DIR_ENV = 'RUBIX_LORA_DATA'
+    SETTING_FILE_ENV = 'RUBIX_LORA_SETTING'
+    LOGGING_CONF_ENV = 'RUBIX_LORA_LOG_CONF'
     KEY: str = 'APP_SETTING'
     default_data_dir: str = 'out'
+    default_setting_file: str = 'config.json'
+    default_logging_conf: str = 'logging.conf'
 
     def __init__(self, **kwargs):
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)

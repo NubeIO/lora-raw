@@ -19,8 +19,10 @@ def number_of_workers():
 @click.option('-d', '--data-dir', type=click.Path(), help='Application data dir',
               default=lambda: os.environ.get(AppSetting.DATA_DIR_ENV, AppSetting.default_data_dir))
 @click.option('--prod', is_flag=True, help='Production mode')
-@click.option('-s', '--setting-file', help='Rubix-Lora: setting json file')
-@click.option('-l', '--logging-conf', help='Rubix-Lora: logging config file')
+@click.option('-s', '--setting-file', help='Rubix-Lora: setting json file',
+              default=lambda: os.environ.get(AppSetting.SETTING_FILE_ENV, AppSetting.default_setting_file))
+@click.option('-l', '--logging-conf', help='Rubix-Lora: logging config file',
+              default=lambda: os.environ.get(AppSetting.LOGGING_CONF_ENV, AppSetting.default_logging_conf))
 @click.option('--workers', type=int, default=lambda: number_of_workers(),
               help='Gunicorn: The number of worker processes for handling requests.')
 @click.option('-c', '--gunicorn-config', help='Gunicorn: config file(gunicorn.conf.py)')
@@ -32,7 +34,7 @@ def cli(port, data_dir, prod, workers, setting_file, logging_conf, gunicorn_conf
         'bind': '%s:%s' % ('0.0.0.0', port),
         'workers': workers if prod else 1,
         'log_level': ('INFO' if prod else 'DEBUG' if log_level is None else log_level).lower(),
-        'preload_app': True,
+        'preload_app': False,
         'config': gunicorn_config
     }
     GunicornFlaskApplication(setting, options).run()
