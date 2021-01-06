@@ -32,7 +32,7 @@ def cli(port, data_dir, prod, workers, setting_file, logging_conf, gunicorn_conf
         'bind': '%s:%s' % ('0.0.0.0', port),
         'workers': workers if prod else 1,
         'log_level': ('INFO' if prod else 'DEBUG' if log_level is None else log_level).lower(),
-        'preload_app': True,
+        'preload_app': False,
         'config': gunicorn_config
     }
     GunicornFlaskApplication(setting, options).run()

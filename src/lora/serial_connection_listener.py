@@ -1,10 +1,10 @@
+import time
 from logging import Logger
 
 import serial.tools.list_ports
-import time
 from serial import Serial
 
-from src import SerialSetting, FlaskThread
+from src import SerialSetting
 from src.lora import DeviceRegistry
 from src.lora.decoders.decoder import DecoderFactory
 from src.lora.decoders.decoder_base import DecoderBase
@@ -16,8 +16,6 @@ from src.utils import Singleton
 
 
 class SerialConnectionListener(metaclass=Singleton):
-    __thread = None
-
     def __init__(self):
         self.__config = None
         self.__connection = None
@@ -32,15 +30,11 @@ class SerialConnectionListener(metaclass=Singleton):
         self.logger = logger or Logger(__name__)
         self.__config = config
         self.__serial_driver = SerialDriverModel.create_default_server_if_does_not_exist(self.__config)
-        self.__start_thread()
+        self.__start()
 
     def restart(self, new_serial_driver):
         self.__new_serial_driver = new_serial_driver
         self.logger.info("Restarting the serial driver...")
-
-    def __start_thread(self):
-        SerialConnectionListener.__thread = FlaskThread(target=self.__start, daemon=True)
-        SerialConnectionListener.__thread.start()
 
     def __start(self):
         try:
@@ -51,7 +45,6 @@ class SerialConnectionListener(metaclass=Singleton):
                 while not mqttc.status():
                     self.logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
                     time.sleep(mqttc.config.attempt_reconnect_secs)
-                self.logger.info("MQTT client connected. Resuming...")
             self.__sync_devices()
             self.__read_and_store_value()
         except Exception as e:

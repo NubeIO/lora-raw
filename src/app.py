@@ -14,7 +14,6 @@
 #         f'Failed to load logging config file {logging_file}. Assure the example config is cloned as logging.conf')
 import logging
 import os
-from functools import partial
 
 from flask import Flask
 from flask_cors import CORS
@@ -42,10 +41,7 @@ def create_app(app_setting) -> Flask:
             gunicorn_logger = logging.getLogger('gunicorn.error')
             self.logger.handlers = gunicorn_logger.handlers
             self.logger.setLevel(gunicorn_logger.level)
-            self.logger.info(self.config['SQLALCHEMY_DATABASE_URI'])
-            db.create_all()
-            from src.background import Background
-            Background.run()
+            self.logger.info(app.config['SQLALCHEMY_DATABASE_URI'])
 
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, _):
@@ -59,5 +55,5 @@ def create_app(app_setting) -> Flask:
         _app.register_blueprint(bp_lora)
         return _app
 
-    app.setup = partial(setup, app)
+    setup(app)
     return register_router(app)
