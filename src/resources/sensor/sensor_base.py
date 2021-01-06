@@ -31,5 +31,5 @@ class SensorBase(Resource):
         SensorModel.filter_by_uuid(uuid).update(data)
         db.session.commit()
         sensor_return = SensorModel.find_by_uuid(uuid)
-        DeviceRegistry().add_device(sensor_return.name, uuid)
+        DeviceRegistry().add_device(sensor_return.device_id, sensor_return.name, uuid)
         return sensor_return

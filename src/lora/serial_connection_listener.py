@@ -54,7 +54,7 @@ class SerialConnectionListener(metaclass=Singleton):
     def __sync_devices(self):
         mqttc = MqttClient()
         for point in SensorModel.get_all():
-            DeviceRegistry().add_device(point.device_id, point.uuid)
+            DeviceRegistry().add_device(point.device_id, point.uuid, point.name)
             point_store = point.sensor_store
             if mqttc.config.enabled:
                 topic = mqttc.get_topic(point.name)
