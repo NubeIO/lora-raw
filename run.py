@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-
+import logging.config
 import multiprocessing
 import os
+import sys
 
 import click
 
@@ -31,11 +32,29 @@ def cli(port, data_dir, prod, workers, setting_file, logging_conf, gunicorn_conf
     options = {
         'bind': '%s:%s' % ('0.0.0.0', port),
         'workers': workers if prod else 1,
-        'log_level': ('INFO' if prod else 'DEBUG' if log_level is None else log_level).lower(),
         'preload_app': False,
         'config': gunicorn_config
     }
+    try:
+        with open(resource_path('config/VERSION')) as version_file:
+            version = version_file.read().strip()
+    except FileNotFoundError:
+        version = 'Fake'
+    print('version', version)
+    from src.utils.custom_logger import CustomLogger
+    logging.setLoggerClass(CustomLogger)
+    logging.config.fileConfig(resource_path('config/logging.example.conf'))
     GunicornFlaskApplication(setting, options).run()
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 
 if __name__ == '__main__':

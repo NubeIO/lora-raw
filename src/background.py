@@ -1,8 +1,7 @@
-from logging import Logger
+import logging
 from threading import Thread
 
 from flask import current_app
-from werkzeug.local import LocalProxy
 
 
 class FlaskThread(Thread):
@@ -27,13 +26,12 @@ class Background:
         from src import AppSetting
         from src.lora import SerialConnectionListener
         from src.mqtt import MqttClient
+        logging.info("Running Background Task...")
         setting: AppSetting = current_app.config[AppSetting.KEY]
-        logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
-        logger.info("Running Background Task...")
         if setting.mqtt.enabled:
             FlaskThread(target=MqttClient().start, daemon=True,
-                        kwargs={'config': setting.mqtt, 'logger': logger}).start()
+                        kwargs={'config': setting.mqtt}).start()
 
         if setting.serial.enabled:
             FlaskThread(target=SerialConnectionListener().start, daemon=True,
-                        kwargs={'config': setting.serial, 'logger': logger}).start()
+                        kwargs={'config': setting.serial}).start()

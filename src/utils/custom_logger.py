@@ -5,22 +5,22 @@ from src.mqtt import MqttClient
 
 class CustomLogger(logging.Logger):
     def debug(self, msg, *args, **kwargs):
-        if MqttClient().config.debug:
+        if MqttClient().config and MqttClient().config.debug:
             self.publish_mqtt_topic(msg, 'DEBUG', args, kwargs)
         return super(CustomLogger, self).debug(msg, *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
-        if MqttClient().config.debug:
+        if MqttClient().config and MqttClient().config.debug:
             self.publish_mqtt_topic(msg, 'INFO', args, kwargs)
         return super(CustomLogger, self).info(msg, *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
-        if MqttClient().config.debug:
+        if MqttClient().config and MqttClient().config.debug:
             self.publish_mqtt_topic(msg, 'WARNING', args, kwargs)
         return super(CustomLogger, self).warning(msg, *args, **kwargs)
 
     def error(self, msg, *args, **kwargs):
-        if MqttClient().config.debug:
+        if MqttClient().config and MqttClient().config.debug:
             self.publish_mqtt_topic(msg, 'ERROR', args, kwargs)
         return super(CustomLogger, self).error(msg, *args, **kwargs)
 
