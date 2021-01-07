@@ -36,10 +36,7 @@ class DeviceBase(Resource):
         DeviceRegistry().add_device(device.name, device.uuid)
         return device
 
-    def delete_device(self, _uuid):
-        device = DeviceModel.find_by_uuid(_uuid)
+    def delete_device(self, device):
         if device:
             device.delete_from_db()
             DeviceRegistry().remove_device(device.device_id)
-            return device
-        return None

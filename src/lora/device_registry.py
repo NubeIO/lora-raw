@@ -9,7 +9,7 @@ class DeviceRegistry(metaclass=Singleton):
     def get_devices(self):
         return self.__devices
 
-    def get_device(self, device_id) -> tuple:
+    def get_device(self, device_id):
         if device_id in self.__devices.keys():
             return self.__devices[device_id]
         return None
@@ -19,6 +19,3 @@ class DeviceRegistry(metaclass=Singleton):
 
     def remove_device(self, device_id):
         self.__devices.pop(device_id, None)
-
-    def remove_all_devices(self):
-        self.__devices = {}

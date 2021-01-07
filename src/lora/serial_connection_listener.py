@@ -1,7 +1,7 @@
+import time
 from logging import Logger
 
 import serial.tools.list_ports
-import time
 from serial import Serial
 
 from src import SerialSetting
@@ -100,7 +100,7 @@ class SerialConnectionListener(metaclass=Singleton):
             if self.__check_and_set_restart():
                 break
             if not self.__connection:
-                raise Exception('Connection not established')
+                self.logger('Connection not established')
 
             try:
                 data = self.__connection.readline().strip().decode('utf-8')
@@ -140,7 +140,7 @@ class SerialConnectionListener(metaclass=Singleton):
                         if key == point.device_point_name:
                             point_store = point.point_store
                             point_store.value_original = payload[key]
-                            updated = point.update_point_value(point.point_store)
+                            point.update_point_value(point.point_store)
                 self.__publish_device_payload(device, payload)
         elif data:
             self.logger.debug("Raw serial: {}".format(data))

@@ -61,11 +61,6 @@ class DeviceModel(ModelBase):
     def delete_from_db(self):
         super().delete_from_db()
 
-    @classmethod
-    def delete_all_from_db(cls):
-        cls.query.delete()
-        db.session.commit()
-
     @validates('device_model', 'device_type')
     def validate_device_model(self, key, value):
         if key == 'device_type':

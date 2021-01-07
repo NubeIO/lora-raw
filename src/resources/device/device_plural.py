@@ -3,8 +3,8 @@ import uuid
 from flask_restful import marshal_with
 
 from src.models.model_device import DeviceModel
-from src.resources.mod_fields import device_fields
 from src.resources.device.device_base import DeviceBase
+from src.resources.mod_fields import device_fields
 
 
 class DevicePlural(DeviceBase):
@@ -17,7 +17,3 @@ class DevicePlural(DeviceBase):
         uuid_ = str(uuid.uuid4())
         data = DevicePlural.parser.parse_args()
         return self.add_device(uuid_, data)
-
-    def delete(self):
-        DeviceModel.delete_all_from_db()
-        return '', 204
