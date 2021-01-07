@@ -7,14 +7,14 @@ from src.resources.mod_fields import network_fields
 
 class SerialDriver(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('port', type=str)
-    parser.add_argument('baud_rate', type=int)
-    parser.add_argument('stop_bits', type=int)
-    parser.add_argument('parity', type=str)
-    parser.add_argument('byte_size', type=int)
-    parser.add_argument('timeout', type=int)
-    parser.add_argument('firmware_version', type=str)
-    parser.add_argument('encryption_key', type=str)
+    parser.add_argument('port', type=str, store_missing=False)
+    parser.add_argument('baud_rate', type=int, store_missing=False)
+    parser.add_argument('stop_bits', type=int, store_missing=False)
+    parser.add_argument('parity', type=str, store_missing=False)
+    parser.add_argument('byte_size', type=int, store_missing=False)
+    parser.add_argument('timeout', type=int, store_missing=False)
+    parser.add_argument('firmware_version', type=str, store_missing=False)
+    parser.add_argument('encryption_key', type=str, store_missing=False)
 
     @marshal_with(network_fields)
     def get(self):
@@ -23,12 +23,8 @@ class SerialDriver(Resource):
     @marshal_with(network_fields)
     def patch(self):
         data = SerialDriver.parser.parse_args()
-        data_to_update = {}
-        for key in data.keys():
-            if data[key] is not None:
-                data_to_update[key] = data[key]
         try:
-            NetworkModel.filter_one().update(data_to_update)
+            NetworkModel.filter_one().update(data)
             new_serial_driver = NetworkModel.find_one()
             NetworkModel.commit()
             SerialConnectionListener().restart(new_serial_driver)

@@ -38,7 +38,7 @@ device_fields = {
     'device_type': fields.String(attribute="device_type.name"),
     'device_model': fields.String(attribute="device_model.name"),
     'description': fields.String,
-    'fault': fields.Integer,
+    'fault': fields.Boolean,
     'created_on': fields.String,
     'updated_on': fields.String,
     'points': fields.Nested(point_fields)

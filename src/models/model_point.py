@@ -86,16 +86,16 @@ class PointModel(ModelBase):
     # def get_model_event_type(self) -> EventType:
     #     return EventType.POINT_UPDATE
 
-    def update(self, **kwargs):
-        super().update(**kwargs)
-
-        point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
-        updated = point_store.update(0)
-        self.point_store = point_store
-        if updated:
-            self.publish_cov(self.point_store)
-
-        return self
+    # def update(self, **kwargs):
+    #     super().update(**kwargs)
+    #
+    #     point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
+    #     updated = point_store.update(0)
+    #     self.point_store = point_store
+    #     if updated:
+    #         self.publish_cov(self.point_store)
+    #
+    #     return self
 
     @classmethod
     def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
@@ -125,30 +125,31 @@ class PointModel(ModelBase):
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
                     service_name: str = None):
-        if point_store is None:
-            raise Exception('Point.publish_cov point_store cannot be None')
-        if device is None:
-            device = DeviceModel.find_by_uuid(self.device_uuid)
-        if network is None:
-            network = NetworkModel.find_by_uuid(device.network_uuid)
-        if device is None or network is None:
-            raise Exception(f'Cannot find network or device for point {self.uuid}')
-        if service_name is None:
-            service_name = network.driver
+        pass
+        # if point_store is None:
+        #     raise Exception('Point.publish_cov point_store cannot be None')
+        # if device is None:
+        #     device = DeviceModel.find_by_uuid(self.device_uuid)
+        # if network is None:
+        #     network = NetworkModel.find_by_uuid(device.network_uuid)
+        # if device is None or network is None:
+        #     raise Exception(f'Cannot find network or device for point {self.uuid}')
+        # if service_name is None:
+        #     service_name = network.driver
+        #
+        # if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
+        #     device.history_enable:
+        #     self.create_history(point_store)
+        #
+        # from src import EventDispatcher
+        # EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
+        #     'point': self,
+        #     'point_store': point_store,
+        #     'device': device,
+        #     'network': network,
+        #     'source_driver': service_name
+        # }))
 
-    #     if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
-    #         device.history_enable:
-    #         self.create_history(point_store)
-    #
-    #     from src import EventDispatcher
-    #     EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
-    #         'point': self,
-    #         'point_store': point_store,
-    #         'device': device,
-    #         'network': network,
-    #         'source_driver': service_name
-    #     }))
-    #
     # def create_history(self, point_store: PointStoreModel):
     #     from src import AppSetting
     #     setting: AppSetting = current_app.config[AppSetting.KEY]
