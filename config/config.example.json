@@ -15,7 +15,6 @@
   },
   "serial": {
     "enabled": true,
-    "name": "lora-raw-network",
     "port": "/dev/ttyUSB0",
     "baud_rate": 9600,
     "stop_bits": 1,
