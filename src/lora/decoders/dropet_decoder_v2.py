@@ -1,8 +1,4 @@
-import logging
-
 from src.lora.decoders.decoder_base import DecoderBase
-
-logger = logging.getLogger(__name__)
 
 
 class DropletDecoderTHv2(DecoderBase):
