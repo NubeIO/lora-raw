@@ -36,4 +36,5 @@ class Background:
                         kwargs={'config': setting.mqtt, 'logger': logger}).start()
 
         if setting.serial.enabled:
-            SerialConnectionListener().start(setting.serial, logger)
+            FlaskThread(target=SerialConnectionListener().start, daemon=True,
+                        kwargs={'config': setting.serial, 'logger': logger}).start()

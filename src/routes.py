@@ -1,18 +1,17 @@
 from flask import Blueprint
 from flask_restful import Api
 
+from src.resources.device.device_plural import DevicePlural
+from src.resources.device.device_singular import DeviceSingularByName, DeviceSingularByUUID
+from src.resources.network.network import SerialDriver
 from src.resources.ping import Ping
-from src.resources.sensor.sensor_name import SensorName
-from src.resources.sensor.sensor_plural import SensorPlural
-from src.resources.sensor.sensor_singular import SensorSingular
-from src.resources.serial_driver.serial import SerialDriver
 
 bp_lora = Blueprint('lora', __name__, url_prefix='/api/lora')
-apiLora = Api(bp_lora)
-apiLora.add_resource(SerialDriver, '/networks')
-apiLora.add_resource(SensorPlural, '/devices')
-apiLora.add_resource(SensorSingular, '/devices/uuid/<string:uuid>')
-apiLora.add_resource(SensorName, '/devices/name/<string:name>')
+api_lora = Api(bp_lora)
+api_lora.add_resource(SerialDriver, '/networks')
+api_lora.add_resource(DevicePlural, '/devices')
+api_lora.add_resource(DeviceSingularByUUID, '/devices/uuid/<string:value>')
+api_lora.add_resource(DeviceSingularByName, '/devices/name/<string:value>')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 Api(bp_system).add_resource(Ping, '/ping')

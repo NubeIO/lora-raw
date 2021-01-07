@@ -1,49 +1,56 @@
 from flask_restful import fields
 
-sensor_store_fields = {
-    'pressure': fields.Float,
-    'temp': fields.Float,
-    'humidity': fields.Float,
-    'voltage': fields.Float,
-    'rssi': fields.Float,
-    'snr': fields.Float,
-    'lux': fields.Float,
-    'movement': fields.Float,
-    'low_battery_alm': fields.Integer,
-    'micro_edge_pulse_count': fields.Integer,
-    'micro_edge_A1': fields.Float,
-    'micro_edge_A2': fields.Float,
-    'micro_edge_A3': fields.Float,
+
+point_store_fields = {
+    'point_uuid': fields.String,
+    'value': fields.Float,
+    'value_original': fields.Float,
+    'value_raw': fields.String,
+    'fault': fields.Boolean,
+    'fault_message': fields.String,
     'ts': fields.String
 }
 
-sensor_fields = {
+point_fields = {
+    'uuid': fields.String,
+    'name': fields.String,
+    'device_point_name': fields.String,
+    'device_uuid': fields.String,
+    'enable': fields.Boolean,
+    'cov_threshold': fields.Float,
+    'value_round': fields.Float,
+    'value_offset': fields.Float,
+    'value_operation': fields.Float,
+    'input_min': fields.Float,
+    'input_max': fields.Float,
+    'scale_min': fields.Float,
+    'scale_max': fields.Float,
+    'created_on': fields.String,
+    'updated_on': fields.String,
+    'point_store': fields.Nested(point_store_fields)
+}
+
+device_fields = {
     'uuid': fields.String,
     'name': fields.String,
     'id': fields.String(8, attribute='device_id'),
-
-    'sensor_type': fields.String(attribute="sensor_type.name"),
-    'sensor_model': fields.String(attribute="sensor_model.name"),
-    'micro_edge_input_type': fields.String(attribute="micro_edge_input_type.name"),
-    'sensor_wake_up_rate': fields.Integer,
-
-    'description': fields.String,
     'enable': fields.Boolean,
-    'fault': fields.Integer,
-    'data_round': fields.Integer,
-    'data_offset': fields.Float,
+    'device_type': fields.String(attribute="device_type.name"),
+    'device_model': fields.String(attribute="device_model.name"),
+    'description': fields.String,
+    'fault': fields.Boolean,
     'created_on': fields.String,
     'updated_on': fields.String,
-    'sensor_store': fields.Nested(sensor_store_fields)
+    'points': fields.Nested(point_fields)
 }
 
-serial_driver_field = {
-    'uuid': fields.String,
-    'name': fields.String,
+network_fields = {
     'port': fields.String,
     'baud_rate': fields.Integer,
     'stop_bits': fields.Integer,
     'parity': fields.String(attribute="parity.name"),
     'byte_size': fields.Integer,
     'timeout': fields.Integer,
+    'firmware_version': fields.String(attribute='firmware_version.name'),
+    'encryption_key': fields.String
 }

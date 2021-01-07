@@ -24,13 +24,14 @@ class SerialSetting(BaseSetting):
 
     def __init__(self):
         self.enabled: bool = False
-        self.name: str = 'lora-raw-network'
         self.port: str = '/dev/ttyUSB0'
         self.baud_rate = 9600
         self.stop_bits = 1
         self.parity: str = 'N'
         self.byte_size = 8
         self.timeout = 5
+        self.firmware_version = 'v1'
+        self.encryption_key = ''
 
 
 class MqttSetting(BaseSetting):
@@ -53,9 +54,13 @@ class MqttSetting(BaseSetting):
 
 class AppSetting:
     PORT = 1919
-    DATA_DIR_ENV = 'RUBIX_LORA_DATA'
     FLASK_KEY: str = 'APP_SETTING'
+    DATA_DIR_ENV = 'RUBIX_LORA_DATA'
+    SETTING_FILE_ENV = 'RUBIX_LORA_SETTING'
+    LOGGING_CONF_ENV = 'RUBIX_LORA_LOG_CONF'
     default_data_dir: str = 'out'
+    default_setting_file: str = 'config.json'
+    default_logging_conf: str = 'logging.conf'
 
     def __init__(self, **kwargs):
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)

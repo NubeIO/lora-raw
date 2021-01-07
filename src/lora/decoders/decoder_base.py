@@ -4,6 +4,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# NOTE: names must match decoder payload names/keys
+
+
 class DecoderBase:
 
     def __init__(self, data):

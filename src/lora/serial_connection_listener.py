@@ -1,16 +1,16 @@
+import time
 from logging import Logger
 
 import serial.tools.list_ports
-import time
 from serial import Serial
 
-from src import SerialSetting, FlaskThread
+from src import SerialSetting
 from src.lora import DeviceRegistry
 from src.lora.decoders.decoder import DecoderFactory
 from src.lora.decoders.decoder_base import DecoderBase
-from src.models.model_sensor import SensorModel
-from src.models.model_sensor_store import SensorStoreModel
-from src.models.model_serial import SerialDriverModel
+from src.models.model_device import DeviceModel
+from src.models.model_network import NetworkModel
+from src.models.model_point import PointModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
 
@@ -23,6 +23,7 @@ class SerialConnectionListener(metaclass=Singleton):
         self.__connection = None
         self.__serial_driver = None
         self.__new_serial_driver = None
+        self.__temp_mqttc: MqttClient = MqttClient()
         self.logger = None
 
     def status(self):
@@ -31,43 +32,47 @@ class SerialConnectionListener(metaclass=Singleton):
     def start(self, config: SerialSetting, logger: Logger):
         self.logger = logger or Logger(__name__)
         self.__config = config
-        self.__serial_driver = SerialDriverModel.create_default_server_if_does_not_exist(self.__config)
-        self.__start_thread()
+        self.__start()
 
     def restart(self, new_serial_driver):
         self.__new_serial_driver = new_serial_driver
         self.logger.info("Restarting the serial driver...")
 
-    def __start_thread(self):
-        SerialConnectionListener.__thread = FlaskThread(target=self.__start, daemon=True)
-        SerialConnectionListener.__thread.start()
+    def __check_and_set_restart(self) -> bool:
+        if self.__new_serial_driver and self.__serial_driver != self.__new_serial_driver:
+            self.__serial_driver = self.__new_serial_driver
+            self.__new_serial_driver = None
+            return True
+        return False
 
     def __start(self):
-        try:
-            self.__connect()
-            mqttc = MqttClient()
-            if mqttc.config.enabled:
-                time.sleep(1)  # time for mqtt client to connect
-                while not mqttc.status():
-                    self.logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
-                    time.sleep(mqttc.config.attempt_reconnect_secs)
-                self.logger.info("MQTT client connected. Resuming...")
-            self.__sync_devices()
-            self.__read_and_store_value()
-        except Exception as e:
-            self.__connection = None
-            self.logger.error("Error: {}".format(str(e)))
+        self.__register_devices()
+        self.__serial_driver = NetworkModel.create_network(self.__config)
+        while True:
+            self.__check_and_set_restart()
+            if not self.__connect_serial():
+                time.sleep(5)
+                continue
 
-    def __sync_devices(self):
-        mqttc = MqttClient()
-        for point in SensorModel.get_all():
-            DeviceRegistry().add_device(point.device_id, point.uuid)
-            point_store = point.sensor_store
-            if mqttc.config.enabled:
-                topic = mqttc.get_topic(point.name)
-                mqttc.publish_mqtt_value(topic, point_store.get_value())
+            try:
+                if self.__temp_mqttc.config.enabled:
+                    time.sleep(1)  # time for mqtt client to connect
+                    while not self.__temp_mqttc.status():
+                        self.logger.warning("MQTT not connected. Waiting for MQTT connection successful...")
+                        time.sleep(self.__temp_mqttc.config.attempt_reconnect_secs)
+                    self.logger.info("MQTT client connected. Resuming...")
+            except Exception as e:
+                self.__connection = None
+                self.logger.error("Error: {}".format(str(e)))
+                continue
 
-    def __connect(self):
+            self.__read_serial_loop()
+
+    def __register_devices(self):
+        for device in DeviceModel.get_all():
+            DeviceRegistry().add_device(device.device_id, device.uuid)
+
+    def __connect_serial(self) -> bool:
         self.__connection = Serial()
         self.__connection.port = self.__serial_driver.port
         self.__connection.baudrate = self.__serial_driver.baud_rate
@@ -76,57 +81,69 @@ class SerialConnectionListener(metaclass=Singleton):
         self.__connection.parity = self.__serial_driver.parity.name
         try:
             self.__connection.open()
-            self.logger.info("Serial port {} opened!".format(self.__serial_driver.port))
-            return
         except:
             self.__connection = None
             self.logger.error("Failed to open serial port {}".format(self.__serial_driver.port))
             ports = serial.tools.list_ports.comports()
-            self.logger.info("Available serial ports are:")
+            self.logger.info("    Available serial ports are:")
             i = 0
             for port, desc, _ in sorted(ports):
                 i += 1
-                self.logger.info("{}. {}: {}".format(i, port, desc))
+                self.logger.info("        {}. {}".format(i, port))
+            return False
 
-    def __read_and_store_value(self):
+        self.logger.info("Serial port {} opened!".format(self.__serial_driver.port))
+        return True
+
+    def __read_serial_loop(self):
         while True:
-            if self.__serial_driver != self.__new_serial_driver and self.__new_serial_driver:
-                # when restart occurs
-                self.__serial_driver = self.__new_serial_driver
-                self.__start()
-            try:
-                if not self.__connection:
-                    raise Exception('Connection not established')
-                data = self.__connection.readline().strip().decode('utf-8')
-                self.__store_value(data)
-            except Exception as e:
-                self.logger.error(str(e))
-                if self.__connection:
-                    self.__connection.close()
-                    self.__connection = None
-                time.sleep(5)
-                # retry when reading got failed (unplugging device, device port un-match etc.)
-                self.__start()
+            if self.__check_and_set_restart():
+                break
+            if not self.__connection:
+                self.logger('Connection not established')
 
-    def __store_value(self, data):
+            try:
+                data = self.__connection.readline().strip().decode('utf-8')
+            except Exception as e:
+                # retry when reading got failed (unplugging device, device port un-match etc.)
+                self.logger.error(str(e))
+                time.sleep(5)
+                break
+
+            self.__decode_device(data)
+
+        if self.__connection:
+            self.__connection.close()
+            self.__connection = None
+
+    def __decode_device(self, data: str):
         if data and DecoderBase.check_payload_len(data):
-            self.logger.debug("   payload: {} length: {}".format(data, len(data)))
-            decoder = DecoderFactory.get_decoder(data)
+            self.logger.debug("payload: {} length: {}".format(data, len(data)))
+            device_id = DecoderFactory.get_id(data)
+
+            if DeviceRegistry().get_device(device_id) is None:
+                self.logger.warning('Sensor not in registry: {}'.format(device_id))
+                return
+
+            device = DeviceModel.find_by_id(device_id)
+            decoder = DecoderFactory.get_decoder(data, device.device_model)
             if decoder is None:
-                self.logger.warning('No decoder found... Continuing')
-            else:
-                device_id = decoder.decode_id()
-                devices = DeviceRegistry().get_devices()
-                if device_id in devices:
-                    payload = decoder.decode()
-                    self.logger.debug('    Sensor payload: {}'.format(payload))
-                    if payload is not None:
-                        (uuid, name) = DeviceRegistry().get_device(device_id)
-                        SensorStoreModel.filter_by_sensor_uuid(uuid).update(payload)
-                        SensorStoreModel.commit()
-                        mqttc = MqttClient()
-                        mqttc.publish_mqtt_value(mqttc.get_topic(name), payload)
-                else:
-                    self.logger.warning('      Sensor not in registry: {}'.format(device_id))
+                self.logger.warning(f'No decoder found for device model {device.device_model}... Continuing')
+
+            payload = decoder.decode()
+            self.logger.debug('Sensor payload: {}'.format(payload))
+            if payload is not None:
+                points = device.points
+                point: PointModel
+                for key in payload:
+                    for point in points:
+                        if key == point.device_point_name:
+                            point_store = point.point_store
+                            point_store.value_original = payload[key]
+                            point.update_point_value(point.point_store)
+                self.__publish_device_payload(device, payload)
         elif data:
             self.logger.debug("Raw serial: {}".format(data))
+
+    def __publish_device_payload(self, device: DeviceModel, payload: dict):
+        self.__temp_mqttc.publish_mqtt_value(self.__temp_mqttc.get_topic(device.device_id + '/' + device.name), payload)
