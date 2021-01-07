@@ -23,7 +23,7 @@ class SerialSetting(BaseSetting):
     KEY = 'serial'
 
     def __init__(self):
-        self.enabled: bool = True
+        self.enabled: bool = False
         self.name: str = 'lora-raw-network'
         self.port: str = '/dev/ttyUSB0'
         self.baud_rate = 9600
@@ -37,7 +37,7 @@ class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True
+        self.enabled = False
         self.name = 'lora-raw-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
@@ -52,8 +52,9 @@ class MqttSetting(BaseSetting):
 
 
 class AppSetting:
+    PORT = 1919
     DATA_DIR_ENV = 'RUBIX_LORA_DATA'
-    KEY: str = 'APP_SETTING'
+    FLASK_KEY: str = 'APP_SETTING'
     default_data_dir: str = 'out'
 
     def __init__(self, **kwargs):
@@ -90,7 +91,7 @@ class AppSetting:
         return self
 
     def init_app(self, app: Flask):
-        app.config[AppSetting.KEY] = self
+        app.config[AppSetting.FLASK_KEY] = self
         return self
 
     @staticmethod
