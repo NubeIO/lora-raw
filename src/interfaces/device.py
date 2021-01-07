@@ -18,5 +18,6 @@ class DeviceModels(Enum):
 def verify_device_model(dev_type: DeviceTypes, model: DeviceModels) -> bool:
     if dev_type is DeviceTypes.MICRO_EDGE:
         return model is DeviceModels.MICRO_EDGE
-    else:
-        return True
+    elif model is DeviceModels.MICRO_EDGE:
+        return False
+    return True

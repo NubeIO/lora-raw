@@ -1,6 +1,6 @@
-from flask import current_app
+# from flask import current_app
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.orm import validates
+# from sqlalchemy.orm import validates
 
 from src import db
 # from src.interfaces.point import HistoryType, MathOperation
@@ -11,7 +11,7 @@ from src.models.model_network import NetworkModel
 from src.models.model_point_store import PointStoreModel
 # from src.models.model_point_store_history import PointStoreHistoryModel
 # from src.services.event_service_base import Event, EventType
-from src.utils.model_utils import ModelUtils
+# from src.utils.model_utils import ModelUtils
 
 
 class PointModel(ModelBase):

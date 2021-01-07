@@ -26,7 +26,8 @@ class NetworkModel(ModelBase):
     @classmethod
     def find_one(cls):
         driver = cls.query.first()
-        db.session.refresh(driver)
+        if driver:
+            db.session.refresh(driver)
         return driver
 
     def save_to_db(self):
@@ -36,8 +37,6 @@ class NetworkModel(ModelBase):
     @classmethod
     def create_network(cls, config: SerialSetting):
         serial_driver = NetworkModel.find_one()
-        db.session.refresh(serial_driver)
-
         if not serial_driver:
             uuid_ = str(uuid.uuid4())
             serial_driver = NetworkModel(uuid=uuid_,
@@ -51,20 +50,15 @@ class NetworkModel(ModelBase):
                                          firmware_version=config.firmware_version,
                                          encryption_key=config.encryption_key)
             serial_driver.save_to_db()
+        else:
+            db.session.refresh(serial_driver)
+
         return serial_driver
 
-    @validates('name')
+    @validates('port')
     def validate_name(self, _, value):
-        return self.port
-
-    @validates('encryption_key')
-    def validate_encryption_key(self, _, value):
-        if self.firmware_version == SupportedFirmwareVersion.v1 or \
-                self.firmware_version == SupportedFirmwareVersion.v2_encryption:
-            return None
-        else:
-            assert len(value) == 32
-            return value
+        self.name = value
+        return value
 
     @validates('firmware_version')
     def validate_data_endian(self, _, value):
@@ -73,3 +67,13 @@ class NetworkModel(ModelBase):
         if not value or value not in SupportedFirmwareVersion.__members__:
             raise ValueError("Invalid Firmware Version")
         return SupportedFirmwareVersion[value]
+
+    @validates('encryption_key')
+    def validate_encryption_key(self, _, value):
+        # TODO: handle self.firmware_version is None when this is validated first
+        if self.firmware_version == SupportedFirmwareVersion.v1 or \
+                self.firmware_version == SupportedFirmwareVersion.v2_encryption:
+            return None
+        else:
+            assert len(value) == 32
+            return value

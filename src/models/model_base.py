@@ -9,7 +9,7 @@ class ModelBase(db.Model):
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def save_to_db(self):
-        self.save_to_db_no_commit()
+        ModelBase.save_to_db_no_commit(self)
         db.session.commit()
 
     def save_to_db_no_commit(self):

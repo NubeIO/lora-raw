@@ -133,7 +133,6 @@ class SerialConnectionListener(metaclass=Singleton):
             payload = decoder.decode()
             self.logger.debug('Sensor payload: {}'.format(payload))
             if payload is not None:
-                print(payload)
                 points = device.points
                 point: PointModel
                 for key in payload:

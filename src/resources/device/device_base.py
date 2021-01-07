@@ -1,12 +1,8 @@
-import uuid
-
 from flask_restful import Resource, reqparse, abort
 
 from src import db
 from src.lora import DeviceRegistry
 from src.models.model_device import DeviceModel
-from src.models.model_point import PointModel
-from src.models.device_point_presets import get_device_points
 
 
 class DeviceBase(Resource):
@@ -21,16 +17,7 @@ class DeviceBase(Resource):
     def add_device(self, _uuid, data):
         try:
             device: DeviceModel = DeviceModel(uuid=_uuid, **data)
-            device.save_to_db_no_commit()
-            device_points = get_device_points(device.device_model)
-            point: PointModel
-            for point in device_points:
-                point.uuid = str(uuid.uuid4())
-                point.device_point_name = point.name  # to match decoder key
-                point.name = device.name + '_' + point.name
-                point.device_uuid = device.uuid
-                point.save_to_db_no_commit()
-            device.commit()
+            device.save_to_db()
             DeviceRegistry().add_device(device.device_id, device.uuid)
             return device
         except Exception as e:

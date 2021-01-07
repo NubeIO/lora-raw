@@ -12,7 +12,6 @@ from .setting import AppSetting
 def init_gunicorn_option(_options=None):
     from gevent import monkey as curious_george
     curious_george.patch_all()
-    # curious_george.patch_all(thread=False)
     options = _options or {}
     options.update({'worker_class': GeventWorker.__module__ + '.' + GeventWorker.__qualname__,
                     'logger_class': Logger.__module__ + '.' + Logger.__name__,
@@ -27,7 +26,6 @@ def on_exit(server: Arbiter):
 
 def when_ready(server: Arbiter):
     server.log.info("Server is ready. Spawning workers...")
-    # server.app.application.setup()
 
 
 class GunicornFlaskApplication(BaseApplication, ABC):
