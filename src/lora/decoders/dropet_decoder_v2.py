@@ -5,7 +5,7 @@ from src.lora.decoders.decoder_base import DecoderBase
 logger = logging.getLogger(__name__)
 
 
-class DropletDecoderTH(DecoderBase):
+class DropletDecoderTHv2(DecoderBase):
 
     def decode_pressure(self):
         s = self.data[14:16] + self.data[12:14]
@@ -40,7 +40,7 @@ class DropletDecoderTH(DecoderBase):
         return payload
 
 
-class DropletDecoderTHL(DropletDecoderTH):
+class DropletDecoderTHLv2(DropletDecoderTHv2):
 
     def decode_light(self):
         s = self.data[20:22] + self.data[18:20]
@@ -56,7 +56,7 @@ class DropletDecoderTHL(DropletDecoderTH):
         return payload
 
 
-class DropletDecoderTHLM(DropletDecoderTHL):
+class DropletDecoderTHLMv2(DropletDecoderTHLv2):
 
     def decode_motion(self):
         x = int(self.data[16:18], 16) > 127
@@ -71,7 +71,7 @@ class DropletDecoderTHLM(DropletDecoderTHL):
         return payload
 
 
-class DropletDecoderTHA(DropletDecoderTH):
+class DropletDecoderTHAv2(DropletDecoderTHv2):
 
     def decode_airflow(self):
         # TODO: implement
@@ -101,9 +101,9 @@ class DropletDecoderTHA(DropletDecoderTH):
         return payload
 
 
-class DropletDecoderTHA(DropletDecoderTHL, DropletDecoderTHA):
+class DropletDecoderTHLAv2(DropletDecoderTHLv2, DropletDecoderTHAv2):
 
     def decode(self) -> dict:
-        payload = super(DropletDecoderTHL).decode()
-        payload.update(super(DropletDecoderTHA).decode_self())
+        payload = super(DropletDecoderTHLv2).decode()
+        payload.update(super(DropletDecoderTHAv2).decode_self())
         return payload
