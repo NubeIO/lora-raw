@@ -23,7 +23,7 @@ class SerialSetting(BaseSetting):
     KEY = 'serial'
 
     def __init__(self):
-        self.enabled: bool = False
+        self.enabled: bool = True  # TODO make it false
         self.port: str = '/dev/ttyUSB0'
         self.baud_rate = 9600
         self.stop_bits = 1
@@ -38,7 +38,7 @@ class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = False
+        self.enabled = True  # TODO make it false
         self.name = 'lora-raw-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
