@@ -26,7 +26,7 @@ class SerialSetting(BaseSetting):
     KEY = 'serial'
 
     def __init__(self):
-        self.enabled: bool = True  # TODO make it false
+        self.enabled: bool = True
         self.port: str = '/dev/ttyUSB0'
         self.baud_rate = 9600
         self.stop_bits = 1
@@ -41,7 +41,7 @@ class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True  # TODO make it false
+        self.enabled = True
         self.name = 'lora-raw-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
@@ -50,9 +50,11 @@ class MqttSetting(BaseSetting):
         self.retain = False
         self.attempt_reconnect_on_unavailable = True
         self.attempt_reconnect_secs = 5
-        self.topic = 'lora_raw'
-        self.debug = True
-        self.debug_topic = 'debug_lora_raw'
+        self.topic = 'rubix/lora_raw/value'
+        self.publish_raw = True
+        self.raw_topic = 'rubix/lora_raw/raw'
+        self.publish_debug = True
+        self.debug_topic = 'rubix/lora_raw/debug'
 
 
 class AppSetting:

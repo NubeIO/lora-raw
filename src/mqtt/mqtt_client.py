@@ -55,7 +55,10 @@ class MqttClient(metaclass=Singleton):
             "MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, self.config.retain))
         self.__client.publish(topic, str(payload), qos=self.config.qos, retain=self.config.retain)
 
-    def publish_log(self, payload):
+    def publish_raw(self, payload):
+        self.publish_mqtt_value(self.config.raw_topic, payload)
+
+    def publish_debug(self, payload):
         self.publish_mqtt_value(self.config.debug_topic, payload)
 
     def __on_connect(self, client, userdata, flags, reason_code, properties=None):

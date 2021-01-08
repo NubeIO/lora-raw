@@ -117,6 +117,8 @@ class SerialConnectionListener(metaclass=Singleton):
             self.__connection = None
 
     def __decode_device(self, data: str):
+        if data and MqttClient().config and MqttClient().config.publish_raw:
+            MqttClient().publish_raw(data)
         if data and DecoderBase.check_payload_len(data):
             logger.debug("payload: {} length: {}".format(data, len(data)))
             device_id = DecoderFactory.get_id(data)
