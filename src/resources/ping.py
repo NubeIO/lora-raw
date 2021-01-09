@@ -1,15 +1,16 @@
+import time
 from datetime import datetime
 
-import time
 from flask_restful import Resource
 
+from pyinstaller import resource_path
 from src.lora import SerialConnectionListener
 
 startTime = time.time()
 up_time_date = str(datetime.now())
 
 try:
-    with open('VERSION') as version_file:
+    with open(resource_path('VERSION')) as version_file:
         version = version_file.read().strip()
 except FileNotFoundError:
     version = 'Fake'

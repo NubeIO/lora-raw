@@ -1,16 +1,17 @@
-from logging import Logger
+import logging
+import time
 
 import paho.mqtt.client as mqtt_client
-import time
 
 from src import MqttSetting
 from src.utils import Singleton
+
+logger = logging.getLogger(__name__)
 
 
 class MqttClient(metaclass=Singleton):
 
     def __init__(self):
-        self.logger = None
         self.__config = None
         self.__client = None
 
@@ -21,8 +22,7 @@ class MqttClient(metaclass=Singleton):
     def status(self) -> bool:
         return self.__client.is_connected() if self.config and self.config.enabled and self.__client else False
 
-    def start(self, config: MqttSetting, logger: Logger):
-        self.logger = logger or Logger(__name__)
+    def start(self, config: MqttSetting):
         self.__config = config
         self.__client = mqtt_client.Client(self.config.name)
         self.__client.on_connect = self.__on_connect
@@ -32,15 +32,16 @@ class MqttClient(metaclass=Singleton):
                     self.__client.connect(config.host, config.port, config.keepalive)
                     break
                 except ConnectionRefusedError:
-                    self.logger.error('MQTT connection failure: ConnectionRefusedError. \
-                                    Attempting reconnect in {} seconds'.format(config.attempt_reconnect_secs))
+                    logger.error(
+                        'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in {} seconds'.format(
+                            config.attempt_reconnect_secs))
                     time.sleep(config.attempt_reconnect_secs)
         else:
             try:
                 self.__client.connect(config.host, config.port, config.keepalive)
             except Exception as e:
                 self.__client = None
-                self.logger.error(str(e))
+                logger.error(str(e))
                 return
         self.__client.loop_forever()
 
@@ -50,11 +51,14 @@ class MqttClient(metaclass=Singleton):
     def publish_mqtt_value(self, topic, payload):
         if not self.status():
             return
-        self.logger.debug("MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload,
-                                                                                          self.config.retain))
+        logger.debug(
+            "MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, self.config.retain))
         self.__client.publish(topic, str(payload), qos=self.config.qos, retain=self.config.retain)
 
-    def publish_log(self, payload):
+    def publish_raw(self, payload):
+        self.publish_mqtt_value(self.config.raw_topic, payload)
+
+    def publish_debug(self, payload):
         self.publish_mqtt_value(self.config.debug_topic, payload)
 
     def __on_connect(self, client, userdata, flags, reason_code, properties=None):

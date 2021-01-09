@@ -1,8 +1,11 @@
 import json
+import logging.config
 import os
 from abc import ABC
 
 from flask import Flask
+
+from pyinstaller import resource_path
 
 
 class BaseSetting(ABC):
@@ -23,7 +26,7 @@ class SerialSetting(BaseSetting):
     KEY = 'serial'
 
     def __init__(self):
-        self.enabled: bool = True  # TODO make it false
+        self.enabled: bool = True
         self.port: str = '/dev/ttyUSB0'
         self.baud_rate = 9600
         self.stop_bits = 1
@@ -38,7 +41,7 @@ class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True  # TODO make it false
+        self.enabled = True
         self.name = 'lora-raw-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
@@ -47,9 +50,11 @@ class MqttSetting(BaseSetting):
         self.retain = False
         self.attempt_reconnect_on_unavailable = True
         self.attempt_reconnect_secs = 5
-        self.topic = 'lora_raw'
-        self.debug = True
-        self.debug_topic = 'debug_lora_raw'
+        self.topic = 'rubix/lora_raw/value'
+        self.publish_raw = True
+        self.raw_topic = 'rubix/lora_raw/raw'
+        self.publish_debug = True
+        self.debug_topic = 'rubix/lora_raw/debug'
 
 
 class AppSetting:
@@ -61,6 +66,8 @@ class AppSetting:
     default_data_dir: str = 'out'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
+    fallback_logging_conf: str = 'config/logging.example.conf'
+    fallback_prod_logging_conf: str = 'config/logging.prod.example.conf'
 
     def __init__(self, **kwargs):
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
@@ -89,7 +96,19 @@ class AppSetting:
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def reload(self, setting_file: str, logging_file: str, is_json_str=False):
+    def reload(self, setting_file: str, logging_file: str):
+        self.reload_logging(logging_file)
+        return self.reload_settings(setting_file)
+
+    def reload_logging(self, logging_file: str):
+        from src.utils.custom_logger import CustomLogger
+        logging.setLoggerClass(CustomLogger)
+        logging_file = os.path.join(self.__data_dir, logging_file)
+        if not os.path.isfile(logging_file):
+            logging_file = AppSetting.fallback_prod_logging_conf if self.prod else AppSetting.fallback_logging_conf
+        logging.config.fileConfig(resource_path(logging_file))
+
+    def reload_settings(self, setting_file: str, is_json_str=False):
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__mqtt_setting = self.__mqtt_setting.reload(data.get(MqttSetting.KEY, None))
         self.__serial_setting = self.__serial_setting.reload(data.get(SerialSetting.KEY, None))

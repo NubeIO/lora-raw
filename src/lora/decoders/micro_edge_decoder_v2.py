@@ -1,8 +1,4 @@
-import logging
-
 from src.lora.decoders.decoder_base import DecoderBase
-
-logger = logging.getLogger(__name__)
 
 
 class MicroEdgeDecoderV2(DecoderBase):
@@ -42,4 +38,3 @@ class MicroEdgeDecoderV2(DecoderBase):
             'voltage': voltage,
         })
         return payload
-

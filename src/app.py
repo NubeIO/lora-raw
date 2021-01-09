@@ -1,18 +1,3 @@
-# from src.custom_logger import CustomLogger
-#
-# logging.setLoggerClass(CustomLogger)
-#
-# if os.environ.get("data_dir") is None:
-#     logging_file = 'logging/logging.conf'
-# else:
-#     logging_file = os.path.join(os.environ.get("data_dir"), 'logging.conf')
-#
-# try:
-#     logging.config.fileConfig(logging_file)
-# except Exception as e:
-#     raise Exception(
-#         f'Failed to load logging config file {logging_file}. Assure the example config is cloned as logging.conf')
-import logging
 import os
 
 from flask import Flask
@@ -36,13 +21,6 @@ def create_app(app_setting) -> Flask:
     cors.init_app(app)
     db.init_app(app)
 
-    def setup(self):
-        with self.app_context():
-            gunicorn_logger = logging.getLogger('gunicorn.error')
-            self.logger.handlers = gunicorn_logger.handlers
-            self.logger.setLevel(gunicorn_logger.level)
-            self.logger.info(self.config['SQLALCHEMY_DATABASE_URI'])
-
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, _):
         cursor = dbapi_connection.cursor()
@@ -55,5 +33,4 @@ def create_app(app_setting) -> Flask:
         _app.register_blueprint(bp_lora)
         return _app
 
-    setup(app)
     return register_router(app)

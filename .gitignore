@@ -113,9 +113,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-config.ini
-logging.conf
-
 
 # Spyder project settings
 .spyderproject

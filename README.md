@@ -18,7 +18,7 @@
 - Build local binary
 
     ```bash
-    poetry run pyinstaller run.py -n rubix-lora --clean --onefile --add-data VERSION:VERSION
+    poetry run pyinstaller run.py -n rubix-lora --clean --onefile --add-data VERSION:. --add-data config:config --hidden-import=src.utils.color_formatter
     ```
 
   The output is: `dist/rubix-lora`

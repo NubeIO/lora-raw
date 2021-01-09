@@ -1,11 +1,11 @@
-import logging
 import enum
+import logging
 
+from src.interfaces.device import DeviceModels
 from src.lora.decoders.decoder_base import DecoderBase
-from src.lora.decoders.micro_edge_decoder_v2 import MicroEdgeDecoderV2
 from src.lora.decoders.dropet_decoder_v2 import DropletDecoderTHv2, DropletDecoderTHLv2, DropletDecoderTHLMv2, \
     DropletDecoderTHAv2, DropletDecoderTHLAv2
-from src.interfaces.device import DeviceModels
+from src.lora.decoders.micro_edge_decoder_v2 import MicroEdgeDecoderV2
 
 logger = logging.getLogger(__name__)
 
