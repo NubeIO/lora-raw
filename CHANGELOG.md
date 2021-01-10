@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v1.2.1](https://github.com/NubeIO/lora-raw/tree/v1.2.1) (2020-01-10)
+
+### Added
+
+- Fixes to MQTT and threading
+
+
 ## [v1.2.0](https://github.com/NubeIO/lora-raw/tree/v1.2.0) (2020-01-07)
 
 ### Added
