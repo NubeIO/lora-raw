@@ -17,8 +17,8 @@
   },
   "serial": {
     "enabled": true,
-    "port": "/dev/ttyUSB0",
-    "baud_rate": 9600,
+    "port": "/dev/ttyAMA0",
+    "baud_rate": 38400,
     "stop_bits": 1,
     "parity": "N",
     "byte_size": 8,
