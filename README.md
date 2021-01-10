@@ -19,7 +19,7 @@
 
     ```bash
     poetry run pyinstaller run.py -n rubix-lora --clean --onefile \
-            --add-data VERSION:VERSION \
+            --add-data VERSION:. \
             --add-data config:config \
             --hidden-import=src.utils.color_formatter
     ```

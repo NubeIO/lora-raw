@@ -5,7 +5,7 @@ from abc import ABC
 
 from flask import Flask
 
-from pyinstaller import resource_path
+from src.pyinstaller import resource_path
 
 
 class BaseSetting(ABC):

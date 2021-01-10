@@ -3,8 +3,8 @@ from datetime import datetime
 
 from flask_restful import Resource
 
-from pyinstaller import resource_path
 from src.lora import SerialConnectionListener
+from src.pyinstaller import resource_path
 
 startTime = time.time()
 up_time_date = str(datetime.now())
