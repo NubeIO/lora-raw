@@ -10,6 +10,7 @@ ADD poetry.lock pyproject.toml ./
 RUN $HOME/.poetry/bin/poetry install
 
 ADD src src
+ADD config config
 ADD run.py VERSION ./
 RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-lora --clean --onefile \
     --add-data VERSION:VERSION \
