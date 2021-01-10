@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v1.2.2](https://github.com/NubeIO/lora-raw/tree/v1.2.2) (2020-01-10)
+
+### Added
+
+- Last build failed
+
 ## [v1.2.1](https://github.com/NubeIO/lora-raw/tree/v1.2.1) (2020-01-10)
 
 ### Added
