@@ -33,7 +33,7 @@ class DeviceBase(Resource):
             for point in device.points:
                 point.name = point.name.replace(original_device_name, device.name)
         db.session.commit()
-        DeviceRegistry().add_device(device.name, device.uuid)
+        DeviceRegistry().add_device(device.device_id, device.uuid)
         return device
 
     def delete_device(self, device):
