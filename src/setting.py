@@ -61,8 +61,6 @@ class AppSetting:
     PORT = 1919
     FLASK_KEY: str = 'APP_SETTING'
     DATA_DIR_ENV = 'RUBIX_LORA_DATA'
-    SETTING_FILE_ENV = 'RUBIX_LORA_SETTING'
-    LOGGING_CONF_ENV = 'RUBIX_LORA_LOG_CONF'
     default_data_dir: str = 'out'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
