@@ -11,17 +11,13 @@
 
 - Join `venv`
 
-    ```bash
     poetry shell
     ```
 
 - Build local binary
 
     ```bash
-    poetry run pyinstaller run.py -n rubix-lora --clean --onefile \
-            --add-data VERSION:. \
-            --add-data config:config \
-            --hidden-import=src.utils.color_formatter
+    poetry run pyinstaller run.py -n rubix-lora --clean --onefile --add-data VERSION:. --add-data config:config
     ```
 
   The output is: `dist/rubix-lora`
