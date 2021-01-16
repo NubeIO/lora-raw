@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rubix-lora"
-version = "1.2.4"
+version = "1.2.5"
 description = "Rubix Lora interface"
 authors = ["NubeIO"]
 
