@@ -5,6 +5,7 @@ from flask_restful import Resource
 
 from src.lora import SerialConnectionListener
 from src.pyinstaller import resource_path
+from src.utils.project import get_version
 
 startTime = time.time()
 up_time_date = str(datetime.now())
@@ -33,7 +34,7 @@ class Ping(Resource):
         up_hour = round(up_hour, 2)
         up_hour = str(up_hour)
         return {
-            'version': version,
+            'version': get_version(),
             'serial_connection_status': SerialConnectionListener().status(),
             'up_time_date': up_time_date,
             'up_min': up_min,

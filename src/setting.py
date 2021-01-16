@@ -91,7 +91,7 @@ class AppSetting:
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def reload(self, setting_file: str, is_json_str=False):
+    def reload(self, setting_file: str, is_json_str: bool = False):
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__mqtt_setting = self.__mqtt_setting.reload(data.get(MqttSetting.KEY, None))
         self.__serial_setting = self.__serial_setting.reload(data.get(SerialSetting.KEY, None))
