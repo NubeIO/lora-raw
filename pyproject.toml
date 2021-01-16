@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rubix-lora"
-version = "1.2.4"
+version = "1.2.5"
 description = "Rubix Lora interface"
 authors = ["NubeIO"]
 
@@ -19,6 +19,7 @@ gevent = [
 pyserial = "^3.5"
 paho-mqtt = "^1.5.1"
 click = "^7.1.2"
+toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"

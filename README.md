@@ -17,7 +17,7 @@
 - Build local binary
 
     ```bash
-    poetry run pyinstaller run.py -n rubix-lora --clean --onefile --add-data VERSION:. --add-data config:config
+    poetry run pyinstaller run.py -n rubix-lora --clean --onefile --add-data pyproject.toml:. --add-data config:config
     ```
 
   The output is: `dist/rubix-lora`

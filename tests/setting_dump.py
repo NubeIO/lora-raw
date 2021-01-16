@@ -13,9 +13,11 @@ if __name__ == '__main__':
         "retain": false,
         "attempt_reconnect_on_unavailable": true,
         "attempt_reconnect_secs": 5,
-        "topic": "lora_raw",
-        "debug": true,
-        "debug_topic": "debug_lora_raw"
+        "topic": "rubix/lora_raw/value",
+        "publish_raw": true,
+        "raw_topic": "rubix/lora_raw/raw",
+        "publish_debug": true,
+        "debug_topic": "rubix/lora_raw/debug"
       },
       "serial": {
         "enabled": true,
@@ -29,7 +31,7 @@ if __name__ == '__main__':
       }
     }
     '''
-    app_setting = AppSetting().reload_settings(setting, is_json_str=True)
+    app_setting = AppSetting().reload(setting, is_json_str=True)
     print(type(app_setting.mqtt))
     print(type(app_setting.serial))
     print(type(app_setting.mqtt.enabled))
