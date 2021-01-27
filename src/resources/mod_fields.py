@@ -11,7 +11,7 @@ point_store_fields = {
     'ts': fields.String
 }
 
-point_fields = {
+point_fields_only = {
     'uuid': fields.String,
     'name': fields.String,
     'device_point_name': fields.String,
@@ -20,13 +20,18 @@ point_fields = {
     'cov_threshold': fields.Float,
     'value_round': fields.Float,
     'value_offset': fields.Float,
-    'value_operation': fields.Float,
+    'value_operation': fields.String(attribute="value_operation.name"),
     'input_min': fields.Float,
     'input_max': fields.Float,
     'scale_min': fields.Float,
     'scale_max': fields.Float,
     'created_on': fields.String,
-    'updated_on': fields.String,
+    'updated_on': fields.String
+
+}
+
+point_fields = {
+    **point_fields_only,
     'point_store': fields.Nested(point_store_fields)
 }
 

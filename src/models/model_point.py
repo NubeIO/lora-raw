@@ -52,6 +52,14 @@ class PointModel(ModelBase):
             .first()
         return results
 
+    @classmethod
+    def filter_by_uuid(cls, uuid: str):
+        return cls.query.filter_by(uuid=uuid)
+
+    @classmethod
+    def find_by_uuid(cls, uuid: str):
+        return cls.query.filter_by(uuid=uuid).first()
+
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
