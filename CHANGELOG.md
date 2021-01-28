@@ -1,10 +1,9 @@
 # CHANGELOG
-
-## [v1.2.2](https://github.com/NubeIO/lora-raw/tree/v1.2.2) (2020-01-10)
+## [v1.2.7](https://github.com/NubeIO/lora-raw/tree/v1.2.7) (2020-01-29)
 
 ### Added
 
-- Last build failed
+- Added a way to patch points
 
 ## [v1.2.1](https://github.com/NubeIO/lora-raw/tree/v1.2.1) (2020-01-10)
 
