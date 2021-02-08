@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -148,4 +149,5 @@ class SerialConnectionListener(metaclass=Singleton):
             logger.debug("Raw serial: {}".format(data))
 
     def __publish_device_payload(self, device: DeviceModel, payload: dict):
-        self.__temp_mqttc.publish_mqtt_value(self.__temp_mqttc.get_topic(device.device_id + '/' + device.name), payload)
+        self.__temp_mqttc.publish_mqtt_value(self.__temp_mqttc.get_topic(device.device_id + '/' + device.name),
+                                             json.dumps(payload))
