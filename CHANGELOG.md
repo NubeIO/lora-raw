@@ -1,4 +1,11 @@
 # CHANGELOG
+
+## [v1.2.8](https://github.com/NubeIO/lora-raw/tree/v1.2.2) (2020-02-08)
+
+### Added
+
+- JSON string publish instead of python dictionary
+
 ## [v1.2.7](https://github.com/NubeIO/lora-raw/tree/v1.2.7) (2020-01-29)
 
 ### Added
