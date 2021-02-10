@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v1.2.9](https://github.com/NubeIO/lora-raw/tree/v1.2.9) (2020-02-10)
+
+### Added
+
+- Allow unknown options & ignore while running app
+
 ## [v1.2.8](https://github.com/NubeIO/lora-raw/tree/v1.2.2) (2020-02-08)
 
 ### Added
@@ -17,7 +23,6 @@
 ### Added
 
 - Fixes to MQTT and threading
-
 
 ## [v1.2.0](https://github.com/NubeIO/lora-raw/tree/v1.2.0) (2020-01-07)
 
