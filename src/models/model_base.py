@@ -4,7 +4,6 @@ from src import db
 class ModelBase(db.Model):
     __abstract__ = True
 
-    uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 

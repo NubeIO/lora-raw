@@ -10,6 +10,7 @@ from src.models.model_base import ModelBase
 class DeviceModel(ModelBase):
     __tablename__ = 'devices'
 
+    uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False, unique=True)
     device_id = db.Column(db.String(8), nullable=False, unique=True)
     enable = db.Column(db.Boolean, nullable=False, default=True)

@@ -1,6 +1,5 @@
 from flask_restful import fields
 
-
 point_store_fields = {
     'point_uuid': fields.String,
     'value': fields.Float,
@@ -58,4 +57,13 @@ network_fields = {
     'timeout': fields.Integer,
     'firmware_version': fields.String(attribute='firmware_version.name'),
     'encryption_key': fields.String
+}
+
+lp_gbp_mapping_fields = {
+    'lora_point_uuid': fields.String,
+    'generic_point_uuid': fields.String,
+    'bacnet_point_uuid': fields.String,
+    'lora_point_name': fields.String,
+    'generic_point_name': fields.String,
+    'bacnet_point_name': fields.String,
 }

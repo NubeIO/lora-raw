@@ -16,6 +16,8 @@ from src.models.model_point_store import PointStoreModel
 
 class PointModel(ModelBase):
     __tablename__ = 'points'
+
+    uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False, unique=True)
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False, default=True)
