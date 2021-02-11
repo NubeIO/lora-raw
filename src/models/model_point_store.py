@@ -1,7 +1,12 @@
 from ast import literal_eval
+from typing import List
+
+from mrb.mapper import api_to_topic_mapper
+from mrb.message import HttpMethod
 from sqlalchemy import and_, or_
 
-from src import db
+from src import db, FlaskThread
+from src.models.model_mapping import LPGBPointMapping
 
 
 class PointStoreModelMixin(object):
@@ -60,4 +65,30 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                                 or_(self.__table__.c.fault != self.fault,
                                     self.__table__.c.fault_message != self.fault_message))))
         db.session.commit()
-        return bool(res.rowcount)
+        updated: bool = bool(res.rowcount)
+        if updated:
+            FlaskThread(target=self.__sync_point_value, daemon=True).start()
+        return updated
+
+    def __sync_point_value(self):
+        mapping: LPGBPointMapping = LPGBPointMapping.find_by_lora_point_uuid(self.point_uuid)
+        if mapping:
+            if mapping.generic_point_uuid:
+                api_to_topic_mapper(
+                    api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
+                    destination_identifier='ps',
+                    body={"priority_array": {"_16": self.value}},
+                    http_method=HttpMethod.PATCH)
+            elif mapping.bacnet_point_uuid:
+                api_to_topic_mapper(
+                    api=f"/api/bacnet/points/uuid/{mapping.bacnet_point_uuid}",
+                    destination_identifier=f'bacnet',
+                    body={"priority_array_write": {"_16": self.value}},
+                    http_method=HttpMethod.PATCH)
+
+    @classmethod
+    def sync_points_values(cls):
+        mappings: List[LPGBPointMapping] = LPGBPointMapping.find_all()
+        for mapping in mappings:
+            point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.lora_point_uuid)
+            FlaskThread(target=point_store.__sync_point_value, daemon=True).start()
