@@ -10,7 +10,7 @@ from src.resources.mod_fields import device_fields
 class DevicePlural(DeviceBase):
     @marshal_with(device_fields)
     def get(self):
-        return DeviceModel.get_all()
+        return DeviceModel.find_all()
 
     @marshal_with(device_fields)
     def post(self):

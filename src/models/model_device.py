@@ -23,18 +23,6 @@ class DeviceModel(ModelBase):
         return "DeviceModel({})".format(self.uuid)
 
     @classmethod
-    def get_all(cls):
-        return cls.query.all()
-
-    @classmethod
-    def filter_by_uuid(cls, uuid: str):
-        return cls.query.filter_by(uuid=uuid)
-
-    @classmethod
-    def find_by_uuid(cls, uuid: str):
-        return cls.query.filter_by(uuid=uuid).first()
-
-    @classmethod
     def find_by_name(cls, name: str):
         return cls.query.filter_by(name=name).first()
 

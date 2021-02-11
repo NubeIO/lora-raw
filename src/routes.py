@@ -5,16 +5,17 @@ from src.resources.device.device_plural import DevicePlural
 from src.resources.device.device_singular import DeviceSingularByName, DeviceSingularByUUID
 from src.resources.network.network import SerialDriver
 from src.resources.ping import Ping
-from src.resources.points.points import PointsByName, PointsByUUID
+from src.resources.points.points import PointsSingularByName, PointsSingularByUUID, PointsPlural
 
 bp_lora = Blueprint('lora', __name__, url_prefix='/api/lora')
 api_lora = Api(bp_lora)
 api_lora.add_resource(SerialDriver, '/networks')
 api_lora.add_resource(DevicePlural, '/devices')
+api_lora.add_resource(PointsPlural, '/points')
 api_lora.add_resource(DeviceSingularByUUID, '/devices/uuid/<string:value>')
 api_lora.add_resource(DeviceSingularByName, '/devices/name/<string:value>')
-api_lora.add_resource(PointsByUUID, '/points/uuid/<string:value>')
-api_lora.add_resource(PointsByName, '/points/name/<string:value>')
+api_lora.add_resource(PointsSingularByUUID, '/points/uuid/<string:value>')
+api_lora.add_resource(PointsSingularByName, '/points/name/<string:value>')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 Api(bp_system).add_resource(Ping, '/ping')

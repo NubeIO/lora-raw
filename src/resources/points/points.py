@@ -3,10 +3,16 @@ from abc import abstractmethod
 from flask_restful import Resource, marshal_with, abort, reqparse
 
 from src.models.model_point import PointModel
-from src.resources.mod_fields import point_fields_only
+from src.resources.mod_fields import point_fields_only, point_fields
 
 
-class PointsBase(Resource):
+class PointsPlural(Resource):
+    @marshal_with(point_fields)
+    def get(self):
+        return PointModel.find_all()
+
+
+class PointsBaseSingular(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, store_missing=False)
     parser.add_argument('device_point_name', type=str, store_missing=False)
@@ -23,7 +29,7 @@ class PointsBase(Resource):
 
     @marshal_with(point_fields_only)
     def patch(self, value):
-        data = PointsBase.parser.parse_args()
+        data = PointsBaseSingular.parser.parse_args()
         point = self.get_point(value)
         if point.first() is None:
             abort(404, message="Does not exist {}".format(value))
@@ -40,11 +46,11 @@ class PointsBase(Resource):
         raise NotImplementedError('Need to implement')
 
 
-class PointsByUUID(PointsBase):
+class PointsSingularByUUID(PointsBaseSingular):
     def get_point(self, value):
         return PointModel.filter_by_uuid(value)
 
 
-class PointsByName(PointsBase):
+class PointsSingularByName(PointsBaseSingular):
     def get_point(self, value):
         return PointModel.filter_by_name(value)

@@ -70,7 +70,7 @@ class SerialConnectionListener(metaclass=Singleton):
             self.__read_serial_loop()
 
     def __register_devices(self):
-        for device in DeviceModel.get_all():
+        for device in DeviceModel.find_all():
             DeviceRegistry().add_device(device.device_id, device.uuid)
 
     def __connect_serial(self) -> bool:
