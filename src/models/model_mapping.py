@@ -23,7 +23,7 @@ class LPGBPointMapping(ModelBase):
     def validate_generic_point_uuid(self, _, value):
         if value:
             response: Response = api_to_topic_mapper(api=f'/api/generic/points/{value}',
-                                                     destination_identifier=f'ps', http_method=HttpMethod.GET)
+                                                     destination_identifier='ps', http_method=HttpMethod.GET)
             if response.error:
                 raise ValueError(response.error_message)
         return value
@@ -32,7 +32,7 @@ class LPGBPointMapping(ModelBase):
     def validate_bacnet_point_uuid(self, _, value):
         if value:
             response: Response = api_to_topic_mapper(api=f'/api/bacnet/points/uuid/{value}',
-                                                     destination_identifier=f'bacnet', http_method=HttpMethod.GET)
+                                                     destination_identifier='bacnet', http_method=HttpMethod.GET)
             if response.error:
                 raise ValueError(response.error_message)
         return value

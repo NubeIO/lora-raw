@@ -82,7 +82,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             elif mapping.bacnet_point_uuid:
                 api_to_topic_mapper(
                     api=f"/api/bacnet/points/uuid/{mapping.bacnet_point_uuid}",
-                    destination_identifier=f'bacnet',
+                    destination_identifier='bacnet',
                     body={"priority_array_write": {"_16": self.value}},
                     http_method=HttpMethod.PATCH)
 
