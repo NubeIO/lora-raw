@@ -225,8 +225,8 @@ requests = "2.25.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.0.0"
-resolved_reference = "8699a5b719026183eb6c2fff3266ce37ecf720c7"
+reference = "v1.1.0"
+resolved_reference = "e848e96f4ec5d85a37bb4dd18f83f06e99d0a3dc"
 
 [[package]]
 name = "paho-mqtt"
@@ -419,7 +419,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "86b54147e4b1061d9d26a381f9cd03652cde5253399fe9d8712b05e9229b66dc"
+content-hash = "e518fdd044091fa6c6a677db35afd003dd61600e5e7b8d940f23a0679580a012"
 
 [metadata.files]
 altgraph = [

@@ -2,7 +2,6 @@ import logging
 from threading import Thread
 
 from flask import current_app
-from gevent import sleep
 from mrb.brige import MqttRestBridge
 
 from .setting import AppSetting
@@ -43,7 +42,10 @@ class Background:
 
         if setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
-                                              mqtt_setting=setting.mqtt_rest_bridge_setting).start, daemon=True).start()
-            sleep(10)  # todo, callback implementation
-            from .models.model_point_store import PointStoreModel
-            PointStoreModel.sync_points_values()
+                                              mqtt_setting=setting.mqtt_rest_bridge_setting,
+                                              callback=Background.sync_points_values).start, daemon=True).start()
+
+    @staticmethod
+    def sync_points_values():
+        from .models.model_point_store import PointStoreModel
+        PointStoreModel.sync_points_values()

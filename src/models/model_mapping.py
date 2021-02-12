@@ -1,6 +1,5 @@
 from mrb.mapper import api_to_topic_mapper
 from mrb.message import HttpMethod, Response
-from mrb.validator import is_valid
 from sqlalchemy.orm import validates
 
 from src import db
@@ -25,8 +24,8 @@ class LPGBPointMapping(ModelBase):
         if value:
             response: Response = api_to_topic_mapper(api=f'/api/generic/points/{value}',
                                                      destination_identifier=f'ps', http_method=HttpMethod.GET)
-            if not is_valid(response):
-                raise ValueError(response.message)
+            if response.error:
+                raise ValueError(response.error_message)
         return value
 
     @validates('bacnet_point_uuid')
@@ -34,8 +33,8 @@ class LPGBPointMapping(ModelBase):
         if value:
             response: Response = api_to_topic_mapper(api=f'/api/bacnet/points/uuid/{value}',
                                                      destination_identifier=f'bacnet', http_method=HttpMethod.GET)
-            if not is_valid(response):
-                raise ValueError(response.message)
+            if response.error:
+                raise ValueError(response.error_message)
         return value
 
     @validates('bacnet_point_name')
