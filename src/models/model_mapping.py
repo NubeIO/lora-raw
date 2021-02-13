@@ -10,14 +10,14 @@ class LPGBPointMapping(ModelBase):
     """
     lora_point <> generic_point | bacnet_point
     """
-    __tablename__ = 'lp_gbp_mappings'
+    __tablename__ = 'mappings_lp_gbp'
 
     lora_point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
-    generic_point_uuid = db.Column(db.String(80), nullable=True, unique=True, default=None)
-    bacnet_point_uuid = db.Column(db.String(80), nullable=True, unique=True, default=None)
+    generic_point_uuid = db.Column(db.String(80), nullable=True, unique=True)
+    bacnet_point_uuid = db.Column(db.String(80), nullable=True, unique=True)
     lora_point_name = db.Column(db.String(80), nullable=False)
-    generic_point_name = db.Column(db.String(80), nullable=True, default=None)
-    bacnet_point_name = db.Column(db.String(80), nullable=True, default=None)
+    generic_point_name = db.Column(db.String(80), nullable=True)
+    bacnet_point_name = db.Column(db.String(80), nullable=True)
 
     @validates('generic_point_uuid')
     def validate_generic_point_uuid(self, _, value):

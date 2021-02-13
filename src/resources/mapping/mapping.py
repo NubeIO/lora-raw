@@ -16,11 +16,11 @@ class LPGBPMappingResourceList(Resource):
     def post(cls):
         parser = reqparse.RequestParser()
         parser.add_argument('lora_point_uuid', type=str, required=True)
-        parser.add_argument('generic_point_uuid', type=str)
-        parser.add_argument('bacnet_point_uuid', type=str)
+        parser.add_argument('generic_point_uuid', type=str, default=None)
+        parser.add_argument('bacnet_point_uuid', type=str, default=None)
         parser.add_argument('lora_point_name', type=str, required=True)
-        parser.add_argument('generic_point_name', type=str)
-        parser.add_argument('bacnet_point_name', type=str)
+        parser.add_argument('generic_point_name', type=str, default=None)
+        parser.add_argument('bacnet_point_name', type=str, default=None)
         try:
             data = parser.parse_args()
             mapping = LPGBPointMapping(**data)

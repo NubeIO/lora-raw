@@ -8,6 +8,7 @@ from src.resources.mapping.mapping import LPGBPMappingResourceList, LPGBPMapping
 from src.resources.network.network import SerialDriver
 from src.resources.ping import Ping
 from src.resources.point.point import PointsSingularByName, PointsSingularByUUID, PointsPlural
+from src.resources.point.sync import LPBPSync, LPGPSync
 
 bp_lora = Blueprint('lora', __name__, url_prefix='/api/lora')
 api_lora = Api(bp_lora)
@@ -20,12 +21,17 @@ api_lora.add_resource(PointsSingularByUUID, '/points/uuid/<string:value>')
 api_lora.add_resource(PointsSingularByName, '/points/name/<string:value>')
 
 # lora to generic/bacnet points mappings
-bp_lp_gbp_mapping = Blueprint('lp_gbp_mappings', __name__, url_prefix='/api/lp_gbp/mappings')
-api_lp_gbp_mapping = Api(bp_lp_gbp_mapping)
-api_lp_gbp_mapping.add_resource(LPGBPMappingResourceList, '')
-api_lp_gbp_mapping.add_resource(LPGBPMappingResourceByLoRaPointUUID, '/lora/<string:point_uuid>')
-api_lp_gbp_mapping.add_resource(LPGBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
-api_lp_gbp_mapping.add_resource(LPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
+bp_mapping_lp_gbp = Blueprint('mappings_lp_gbp', __name__, url_prefix='/api/mappings/lp_gbp')
+api_mapping_lp_gbp = Api(bp_mapping_lp_gbp)
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceList, '')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByLoRaPointUUID, '/lora/<string:point_uuid>')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
+
+bp_sync = Blueprint('sync', __name__, url_prefix='/api/sync')
+api_sync = Api(bp_sync)
+api_sync.add_resource(LPGPSync, '/lp_gp')
+api_sync.add_resource(LPBPSync, '/lp_bp')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 Api(bp_system).add_resource(Ping, '/ping')
