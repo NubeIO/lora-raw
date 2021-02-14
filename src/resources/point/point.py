@@ -3,7 +3,7 @@ from abc import abstractmethod
 from flask_restful import Resource, marshal_with, abort, reqparse
 
 from src.models.model_point import PointModel
-from src.resources.mod_fields import point_fields_only, point_fields
+from src.resources.model_fields import point_fields_only, point_fields
 
 
 class PointsPlural(Resource):

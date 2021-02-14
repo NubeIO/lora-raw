@@ -4,7 +4,7 @@ from flask_restful import Resource, marshal_with, abort, reqparse
 from sqlalchemy.exc import IntegrityError
 
 from src.models.model_mapping import LPGBPointMapping
-from src.resources.mod_fields import mapping_lp_gbp_fields
+from src.resources.model_fields import mapping_lp_gbp_fields
 
 
 class LPGBPMappingResourceList(Resource):

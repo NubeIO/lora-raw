@@ -4,7 +4,7 @@ from flask_restful import marshal_with
 
 from src.models.model_device import DeviceModel
 from src.resources.device.device_base import DeviceBase
-from src.resources.mod_fields import device_fields
+from src.resources.model_fields import device_fields
 
 
 class DevicePlural(DeviceBase):

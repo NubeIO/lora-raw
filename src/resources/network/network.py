@@ -2,7 +2,7 @@ from flask_restful import reqparse, marshal_with, Resource, abort
 
 from src.lora import SerialConnectionListener
 from src.models.model_network import NetworkModel
-from src.resources.mod_fields import network_fields
+from src.resources.model_fields import network_fields
 
 
 class SerialDriver(Resource):
