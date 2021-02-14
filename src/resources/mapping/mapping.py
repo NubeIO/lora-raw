@@ -1,18 +1,20 @@
+import uuid as uuid_
+
 from flask_restful import Resource, marshal_with, abort, reqparse
 from sqlalchemy.exc import IntegrityError
 
 from src.models.model_mapping import LPGBPointMapping
-from src.resources.mod_fields import lp_gbp_mapping_fields
+from src.resources.mod_fields import mapping_lp_gbp_fields
 
 
 class LPGBPMappingResourceList(Resource):
     @classmethod
-    @marshal_with(lp_gbp_mapping_fields)
+    @marshal_with(mapping_lp_gbp_fields)
     def get(cls):
         return LPGBPointMapping.find_all()
 
     @classmethod
-    @marshal_with(lp_gbp_mapping_fields)
+    @marshal_with(mapping_lp_gbp_fields)
     def post(cls):
         parser = reqparse.RequestParser()
         parser.add_argument('lora_point_uuid', type=str, required=True)
@@ -23,6 +25,7 @@ class LPGBPMappingResourceList(Resource):
         parser.add_argument('bacnet_point_name', type=str, default=None)
         try:
             data = parser.parse_args()
+            data.uuid = str(uuid_.uuid4())
             mapping = LPGBPointMapping(**data)
             mapping.save_to_db()
             return mapping
@@ -36,36 +39,63 @@ class LPGBPMappingResourceList(Resource):
 
 class LPGBPMappingResourceBase(Resource):
     @classmethod
-    @marshal_with(lp_gbp_mapping_fields)
-    def get(cls, point_uuid):
-        mapping = cls.get_mapping(point_uuid)
+    @marshal_with(mapping_lp_gbp_fields)
+    def get(cls, uuid):
+        mapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message=f'Does not exist {point_uuid}')
+            abort(404, message=f'Does not exist {uuid}')
         return mapping
 
     @classmethod
-    def delete(cls, point_uuid):
-        mapping = cls.get_mapping(point_uuid)
+    def delete(cls, uuid):
+        mapping = cls.get_mapping(uuid)
         if mapping is None:
-            abort(404, message=f'Does not exist {point_uuid}')
+            abort(404, message=f'Does not exist {uuid}')
         else:
             mapping.delete_from_db()
         return '', 204
 
 
+class LPGBPMappingResourceByUUID(LPGBPMappingResourceBase):
+    parser = reqparse.RequestParser()
+    parser.add_argument('lora_point_uuid', type=str)
+    parser.add_argument('generic_point_uuid', type=str, default=None)
+    parser.add_argument('bacnet_point_uuid', type=str, default=None)
+    parser.add_argument('lora_point_name', type=str)
+    parser.add_argument('generic_point_name', type=str, default=None)
+    parser.add_argument('bacnet_point_name', type=str, default=None)
+
+    @classmethod
+    @marshal_with(mapping_lp_gbp_fields)
+    def patch(cls, uuid):
+        data = LPGBPMappingResourceByUUID.parser_patch.parse_args()
+        mapping = cls.get_mapping(uuid)
+        if not mapping:
+            abort(404, message='Does not exist {}'.format(uuid))
+        try:
+            LPGBPointMapping.filter_by_uuid(uuid).update(data)
+            LPGBPointMapping.commit()
+        except Exception as e:
+            abort(500, message=str(e))
+
+    @classmethod
+    def get_mapping(cls, uuid):
+        return LPGBPointMapping.find_by_uuid(uuid)
+
+
 class LPGBPMappingResourceByLoRaPointUUID(LPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, point_uuid):
-        return LPGBPointMapping.find_by_lora_point_uuid(point_uuid)
+    def get_mapping(cls, uuid):
+        return LPGBPointMapping.find_by_lora_point_uuid(uuid)
 
 
 class LPGBPMappingResourceByGenericPointUUID(LPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, point_uuid):
-        return LPGBPointMapping.find_by_generic_point_uuid(point_uuid)
+    def get_mapping(cls, uuid):
+        return LPGBPointMapping.find_by_generic_point_uuid(uuid)
 
 
 class LPGBPMappingResourceByBACnetPointUUID(LPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, point_uuid):
-        return LPGBPointMapping.find_by_bacnet_point_uuid(point_uuid)
+    def get_mapping(cls, uuid):
+        return LPGBPointMapping.find_by_bacnet_point_uuid(uuid)

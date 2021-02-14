@@ -4,7 +4,7 @@ from flask_restful import Api
 from src.resources.device.device_plural import DevicePlural
 from src.resources.device.device_singular import DeviceSingularByName, DeviceSingularByUUID
 from src.resources.mapping.mapping import LPGBPMappingResourceList, LPGBPMappingResourceByLoRaPointUUID, \
-    LPGBPMappingResourceByGenericPointUUID, LPGBPMappingResourceByBACnetPointUUID
+    LPGBPMappingResourceByGenericPointUUID, LPGBPMappingResourceByBACnetPointUUID, LPGBPMappingResourceByUUID
 from src.resources.network.network import SerialDriver
 from src.resources.ping import Ping
 from src.resources.point.point import PointsSingularByName, PointsSingularByUUID, PointsPlural
@@ -24,9 +24,10 @@ api_lora.add_resource(PointsSingularByName, '/points/name/<string:value>')
 bp_mapping_lp_gbp = Blueprint('mappings_lp_gbp', __name__, url_prefix='/api/mappings/lp_gbp')
 api_mapping_lp_gbp = Api(bp_mapping_lp_gbp)
 api_mapping_lp_gbp.add_resource(LPGBPMappingResourceList, '')
-api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByLoRaPointUUID, '/lora/<string:point_uuid>')
-api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
-api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByUUID, '/uuid/<string:uuid>')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByLoRaPointUUID, '/lora/<string:uuid>')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByGenericPointUUID, '/generic/<string:uuid>')
+api_mapping_lp_gbp.add_resource(LPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:uuid>')
 
 bp_sync = Blueprint('sync', __name__, url_prefix='/api/sync')
 api_sync = Api(bp_sync)

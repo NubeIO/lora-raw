@@ -59,7 +59,8 @@ network_fields = {
     'encryption_key': fields.String
 }
 
-lp_gbp_mapping_fields = {
+mapping_lp_gbp_fields = {
+    'uuid': fields.String,
     'lora_point_uuid': fields.String,
     'generic_point_uuid': fields.String,
     'bacnet_point_uuid': fields.String,
