@@ -1,10 +1,18 @@
 import uuid as uuid_
+from abc import abstractmethod
 
 from flask_restful import Resource, marshal_with, abort, reqparse
 from sqlalchemy.exc import IntegrityError
 
 from src.models.model_mapping import LPGBPointMapping
+from src.models.model_point_store import PointStoreModel
 from src.resources.model_fields import mapping_lp_gbp_fields
+
+
+def sync_point_value(mapping: LPGBPointMapping):
+    point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.lora_point_uuid)
+    point_store.sync_point_value_with_mapping(mapping)
+    return mapping
 
 
 class LPGBPMappingResourceList(Resource):
@@ -26,9 +34,9 @@ class LPGBPMappingResourceList(Resource):
         try:
             data = parser.parse_args()
             data.uuid = str(uuid_.uuid4())
-            mapping = LPGBPointMapping(**data)
+            mapping: LPGBPointMapping = LPGBPointMapping(**data)
             mapping.save_to_db()
-            # TODO: sync
+            sync_point_value(mapping)
             return mapping
         except IntegrityError as e:
             abort(400, message=str(e.orig))
@@ -56,6 +64,11 @@ class LPGBPMappingResourceBase(Resource):
             mapping.delete_from_db()
         return '', 204
 
+    @classmethod
+    @abstractmethod
+    def get_mapping(cls, uuid) -> LPGBPointMapping:
+        raise NotImplementedError
+
 
 class LPGBPMappingResourceByUUID(LPGBPMappingResourceBase):
     parser = reqparse.RequestParser()
@@ -76,29 +89,30 @@ class LPGBPMappingResourceByUUID(LPGBPMappingResourceBase):
         try:
             LPGBPointMapping.filter_by_uuid(uuid).update(data)
             LPGBPointMapping.commit()
-            # TODO: sync
-            return cls.get_mapping(uuid)
+            output_mapping: LPGBPointMapping = cls.get_mapping(uuid)
+            sync_point_value(output_mapping)
+            return output_mapping
         except Exception as e:
             abort(500, message=str(e))
 
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> LPGBPointMapping:
         return LPGBPointMapping.find_by_uuid(uuid)
 
 
 class LPGBPMappingResourceByLoRaPointUUID(LPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> LPGBPointMapping:
         return LPGBPointMapping.find_by_lora_point_uuid(uuid)
 
 
 class LPGBPMappingResourceByGenericPointUUID(LPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> LPGBPointMapping:
         return LPGBPointMapping.find_by_generic_point_uuid(uuid)
 
 
 class LPGBPMappingResourceByBACnetPointUUID(LPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> LPGBPointMapping:
         return LPGBPointMapping.find_by_bacnet_point_uuid(uuid)
