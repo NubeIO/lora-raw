@@ -28,6 +28,7 @@ class LPGBPMappingResourceList(Resource):
             data.uuid = str(uuid_.uuid4())
             mapping = LPGBPointMapping(**data)
             mapping.save_to_db()
+            # TODO: sync
             return mapping
         except IntegrityError as e:
             abort(400, message=str(e.orig))
@@ -68,13 +69,15 @@ class LPGBPMappingResourceByUUID(LPGBPMappingResourceBase):
     @classmethod
     @marshal_with(mapping_lp_gbp_fields)
     def patch(cls, uuid):
-        data = LPGBPMappingResourceByUUID.parser_patch.parse_args()
+        data = LPGBPMappingResourceByUUID.parser.parse_args()
         mapping = cls.get_mapping(uuid)
         if not mapping:
             abort(404, message='Does not exist {}'.format(uuid))
         try:
             LPGBPointMapping.filter_by_uuid(uuid).update(data)
             LPGBPointMapping.commit()
+            # TODO: sync
+            return cls.get_mapping(uuid)
         except Exception as e:
             abort(500, message=str(e))
 
