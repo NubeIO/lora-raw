@@ -94,4 +94,5 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         mappings: List[LPGBPointMapping] = LPGBPointMapping.find_all()
         for mapping in mappings:
             point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.lora_point_uuid)
-            FlaskThread(target=point_store.sync_point_value, daemon=True, kwargs={'gp': gp, 'bp': bp}).start()
+            if point_store:
+                FlaskThread(target=point_store.sync_point_value, daemon=True, kwargs={'gp': gp, 'bp': bp}).start()
