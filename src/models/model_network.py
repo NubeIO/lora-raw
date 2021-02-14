@@ -9,6 +9,7 @@ from src.models.model_base import ModelBase
 class NetworkModel(ModelBase):
     __tablename__ = 'network'
 
+    uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     port = db.Column(db.String(40), nullable=False, unique=True)
     baud_rate = db.Column(db.Integer, default=9600)

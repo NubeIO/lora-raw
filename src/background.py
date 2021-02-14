@@ -2,6 +2,7 @@ import logging
 from threading import Thread
 
 from flask import current_app
+from mrb.brige import MqttRestBridge
 
 from .setting import AppSetting
 
@@ -38,3 +39,14 @@ class Background:
         if setting.serial.enabled:
             FlaskThread(target=SerialConnectionListener().start, daemon=True,
                         kwargs={'config': setting.serial}).start()
+
+        if setting.mqtt_rest_bridge_setting.enabled:
+            FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
+                                              mqtt_setting=setting.mqtt_rest_bridge_setting,
+                                              callback=Background.sync_on_start).start, daemon=True).start()
+
+    @staticmethod
+    def sync_on_start():
+        from .models.model_point_store import PointStoreModel
+        """Sync mapped points values from LoRa > Generic | BACnet points values"""
+        FlaskThread(target=PointStoreModel.sync_points_values).start()

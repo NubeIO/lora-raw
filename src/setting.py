@@ -3,6 +3,7 @@ import os
 from abc import ABC
 
 from flask import Flask
+from mrb.setting import MqttSetting as MqttRestBridgeSetting
 
 
 class BaseSetting(ABC):
@@ -62,20 +63,33 @@ class AppSetting:
     FLASK_KEY: str = 'APP_SETTING'
     DATA_DIR_ENV = 'RUBIX_LORA_DATA'
     default_data_dir: str = 'out'
+    default_identifier: str = 'lora'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
     fallback_logging_conf: str = 'config/logging.example.conf'
     fallback_prod_logging_conf: str = 'config/logging.prod.example.conf'
 
     def __init__(self, **kwargs):
+        self.__port = kwargs.get('port') or AppSetting.PORT
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
+        self.__identifier = kwargs.get('identifier') or AppSetting.default_identifier
         self.__prod = kwargs.get('prod') or False
         self.__mqtt_setting = MqttSetting()
         self.__serial_setting = SerialSetting()
+        self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
+        self.__mqtt_rest_bridge_setting.name = 'lora_mqtt_rest_bridge_listener'
+
+    @property
+    def port(self):
+        return self.__port
 
     @property
     def data_dir(self):
         return self.__data_dir
+
+    @property
+    def identifier(self):
+        return self.__identifier
 
     @property
     def prod(self) -> bool:
@@ -89,6 +103,10 @@ class AppSetting:
     def serial(self) -> SerialSetting:
         return self.__serial_setting
 
+    @property
+    def mqtt_rest_bridge_setting(self) -> MqttRestBridgeSetting:
+        return self.__mqtt_rest_bridge_setting
+
     def serialize(self, pretty=True) -> str:
         m = {MqttSetting.KEY: self.mqtt, SerialSetting.KEY: self.serial, 'prod': self.prod, 'data_dir': self.data_dir}
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
@@ -98,6 +116,7 @@ class AppSetting:
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__mqtt_setting = self.__mqtt_setting.reload(data.get(MqttSetting.KEY, None))
         self.__serial_setting = self.__serial_setting.reload(data.get(SerialSetting.KEY, None))
+        self.__mqtt_rest_bridge_setting = self.__mqtt_rest_bridge_setting.reload(data.get('mqtt_rest_bridge_listener'))
         return self
 
     def init_app(self, app: Flask):

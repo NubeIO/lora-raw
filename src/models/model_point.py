@@ -16,6 +16,8 @@ from src.models.model_point_store import PointStoreModel
 
 class PointModel(ModelBase):
     __tablename__ = 'points'
+
+    uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False, unique=True)
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False, default=True)
@@ -55,14 +57,6 @@ class PointModel(ModelBase):
             .join(NetworkModel).filter_by(name=network_name) \
             .first()
         return results
-
-    @classmethod
-    def filter_by_uuid(cls, uuid: str):
-        return cls.query.filter_by(uuid=uuid)
-
-    @classmethod
-    def find_by_uuid(cls, uuid: str):
-        return cls.query.filter_by(uuid=uuid).first()
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
@@ -129,7 +123,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
-            -> float or None:
+        -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min

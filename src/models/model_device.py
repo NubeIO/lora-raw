@@ -10,6 +10,7 @@ from src.models.model_base import ModelBase
 class DeviceModel(ModelBase):
     __tablename__ = 'devices'
 
+    uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False, unique=True)
     device_id = db.Column(db.String(8), nullable=False, unique=True)
     enable = db.Column(db.Boolean, nullable=False, default=True)
@@ -21,18 +22,6 @@ class DeviceModel(ModelBase):
 
     def __repr__(self):
         return "DeviceModel({})".format(self.uuid)
-
-    @classmethod
-    def get_all(cls):
-        return cls.query.all()
-
-    @classmethod
-    def filter_by_uuid(cls, uuid: str):
-        return cls.query.filter_by(uuid=uuid)
-
-    @classmethod
-    def find_by_uuid(cls, uuid: str):
-        return cls.query.filter_by(uuid=uuid).first()
 
     @classmethod
     def find_by_name(cls, name: str):
