@@ -1,6 +1,7 @@
 from ast import literal_eval
 from typing import List
 
+from mrb.brige import MqttRestBridge
 from mrb.mapper import api_to_topic_mapper
 from mrb.message import HttpMethod
 from sqlalchemy import and_, or_
@@ -66,11 +67,13 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                                     self.__table__.c.fault_message != self.fault_message))))
         db.session.commit()
         updated: bool = bool(res.rowcount)
-        if updated:
-            FlaskThread(target=self.sync_point_value, daemon=True).start()
+        if MqttRestBridge.status() and updated:
+            FlaskThread(target=self.__sync_point_value, daemon=True).start()
         return updated
 
     def sync_point_value_with_mapping(self, mapping: LPGBPointMapping, gp: bool = True, bp=True):
+        if not MqttRestBridge.status():
+            return
         if mapping.generic_point_uuid and gp:
             api_to_topic_mapper(
                 api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
@@ -84,15 +87,17 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                 body={"priority_array_write": {"_16": self.value}},
                 http_method=HttpMethod.PATCH)
 
-    def sync_point_value(self, gp: bool = True, bp=True):
+    def __sync_point_value(self, gp: bool = True, bp=True):
         mapping: LPGBPointMapping = LPGBPointMapping.find_by_lora_point_uuid(self.point_uuid)
         if mapping:
             self.sync_point_value_with_mapping(mapping, gp, bp)
 
     @classmethod
     def sync_points_values(cls, gp: bool = True, bp=True):
+        if not MqttRestBridge.status():
+            return
         mappings: List[LPGBPointMapping] = LPGBPointMapping.find_all()
         for mapping in mappings:
             point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.lora_point_uuid)
             if point_store:
-                FlaskThread(target=point_store.sync_point_value, daemon=True, kwargs={'gp': gp, 'bp': bp}).start()
+                FlaskThread(target=point_store.__sync_point_value, daemon=True, kwargs={'gp': gp, 'bp': bp}).start()
