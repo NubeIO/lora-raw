@@ -4,8 +4,8 @@ BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
 COLORS = {
     'WARNING': YELLOW,
-    'INFO': GREEN,
-    'DEBUG': BLUE,
+    'INFO': BLUE,
+    'DEBUG': MAGENTA,
     'CRITICAL': YELLOW,
     'ERROR': RED,
     'RED': RED,
