@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.1](https://github.com/NubeIO/lora-raw/tree/v1.3.1) (2020-02-16)
+### Added
+- Updates to protocl bridge
+
 ## [v1.3.0](https://github.com/NubeIO/lora-raw/tree/v1.3.0) (2020-02-15)
 ### Added
 - Add protocl bridge
