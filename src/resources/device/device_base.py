@@ -14,7 +14,8 @@ class DeviceBase(Resource):
     parser.add_argument('device_model', type=str, required=True, store_missing=False)
     parser.add_argument('description', type=str, store_missing=False)
 
-    def add_device(self, _uuid: str, data: dict):
+    @classmethod
+    def add_device(cls, _uuid: str, data: dict):
         try:
             device: DeviceModel = DeviceModel(uuid=_uuid, **data)
             device.save_to_db()
@@ -23,7 +24,8 @@ class DeviceBase(Resource):
         except Exception as e:
             abort(500, message=str(e))
 
-    def update_device(self, device: DeviceModel, data: dict):
+    @classmethod
+    def update_device(cls, device: DeviceModel, data: dict):
         original_device_id = device.device_id
         original_device_name = device.name
         DeviceModel.filter_by_uuid(device.uuid).update(data)
@@ -36,7 +38,9 @@ class DeviceBase(Resource):
         DeviceRegistry().add_device(device.device_id, device.uuid)
         return device
 
-    def delete_device(self, device):
-        if device:
-            device.delete_from_db()
-            DeviceRegistry().remove_device(device.device_id)
+    @classmethod
+    def delete_device(cls, device):
+        if not device:
+            abort(404, message=f'Device not found')
+        device.delete_from_db()
+        DeviceRegistry().remove_device(device.device_id)

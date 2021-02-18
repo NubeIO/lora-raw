@@ -27,30 +27,41 @@ class PointsBaseSingular(Resource):
     parser.add_argument('scale_min', type=int, store_missing=False)
     parser.add_argument('scale_max', type=int, store_missing=False)
 
+    @classmethod
+    @marshal_with(point_fields)
+    def get(cls, **kwargs):
+        point: PointModel = cls.get_point(**kwargs)
+        if not point:
+            abort(404, message='Point is not found')
+        return point
+
+    @classmethod
     @marshal_with(point_fields_only)
-    def patch(self, value):
+    def patch(cls, **kwargs):
         data = PointsBaseSingular.parser.parse_args()
-        point = self.get_point(value)
-        if point.first() is None:
-            abort(404, message="Does not exist {}".format(value))
+        point: PointModel = cls.get_point(**kwargs)
+        if point is None:
+            abort(404, message="Does not exist {}".format(kwargs))
         try:
-            uuid = point.first().uuid
-            point.update(data)
+            PointModel.filter_by_uuid(point.uuid).update(data)
             PointModel.commit()
-            return PointModel.find_by_uuid(uuid)
+            return PointModel.find_by_uuid(point.uuid)
         except Exception as e:
             abort(500, message=str(e))
 
+    @classmethod
     @abstractmethod
-    def get_point(self, value):
+    def get_point(cls, value) -> PointModel:
         raise NotImplementedError('Need to implement')
 
 
 class PointsSingularByUUID(PointsBaseSingular):
-    def get_point(self, value):
-        return PointModel.filter_by_uuid(value)
+    @classmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        return PointModel.find_by_uuid(kwargs.get('uuid'))
 
 
 class PointsSingularByName(PointsBaseSingular):
-    def get_point(self, value):
-        return PointModel.filter_by_name(value)
+    @classmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        return PointModel.find_by_name(kwargs.get('device_name'), kwargs.get('point_name'))
