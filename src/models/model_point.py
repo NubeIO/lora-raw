@@ -1,4 +1,7 @@
+import re
+
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import validates
 
 from src import db
 from src.interfaces.point import MathOperation
@@ -32,6 +35,12 @@ class PointModel(ModelBase):
 
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
+
+    @validates('name')
+    def validate_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("name should be alphanumeric and can contain '_', '-'")
+        return value
 
     @classmethod
     def find_by_name(cls, device_name: str, point_name: str):

@@ -1,3 +1,4 @@
+import re
 import uuid
 from sqlalchemy.orm import validates
 
@@ -19,6 +20,12 @@ class NetworkModel(ModelBase):
     timeout = db.Column(db.Integer, default=5)
     firmware_version = db.Column(db.Enum(SupportedFirmwareVersion), nullable=False)
     encryption_key = db.Column(db.String(32))
+
+    @validates('name')
+    def validate_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("name should be alphanumeric and can contain '_', '-'")
+        return value
 
     @classmethod
     def filter_one(cls):

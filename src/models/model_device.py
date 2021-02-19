@@ -1,3 +1,4 @@
+import re
 import uuid
 
 from sqlalchemy.orm import validates
@@ -22,6 +23,12 @@ class DeviceModel(ModelBase):
 
     def __repr__(self):
         return "DeviceModel({})".format(self.uuid)
+
+    @validates('name')
+    def validate_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("name should be alphanumeric and can contain '_', '-'")
+        return value
 
     @classmethod
     def find_by_name(cls, name: str):

@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 from flask_restful import Resource, marshal_with, abort, reqparse
+from sqlalchemy.exc import IntegrityError
 
 from src.models.model_point import PointModel
 from src.resources.model_fields import point_fields_only, point_fields
@@ -46,6 +47,8 @@ class PointsBaseSingular(Resource):
             PointModel.filter_by_uuid(point.uuid).update(data)
             PointModel.commit()
             return PointModel.find_by_uuid(point.uuid)
+        except IntegrityError as e:
+            abort(400, message=str(e.orig))
         except Exception as e:
             abort(500, message=str(e))
 

@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse, abort
+from sqlalchemy.exc import IntegrityError
 
 from src import db
 from src.lora import DeviceRegistry
@@ -21,6 +22,8 @@ class DeviceBase(Resource):
             device.save_to_db()
             DeviceRegistry().add_device(device.device_id, device.uuid)
             return device
+        except IntegrityError as e:
+            abort(400, message=str(e.orig))
         except Exception as e:
             abort(500, message=str(e))
 
