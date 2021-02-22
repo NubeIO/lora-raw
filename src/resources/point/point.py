@@ -1,19 +1,20 @@
 from abc import abstractmethod
 
-from flask_restful import Resource, marshal_with, abort, reqparse
-from sqlalchemy.exc import IntegrityError
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.models.model_point import PointModel
 from src.resources.model_fields import point_fields_only, point_fields
 
 
-class PointsPlural(Resource):
+class PointsPlural(RubixResource):
     @marshal_with(point_fields)
     def get(self):
         return PointModel.find_all()
 
 
-class PointsBaseSingular(Resource):
+class PointsBaseSingular(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, store_missing=False)
     parser.add_argument('device_point_name', type=str, store_missing=False)
@@ -33,7 +34,7 @@ class PointsBaseSingular(Resource):
     def get(cls, **kwargs):
         point: PointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message='Point is not found')
+            raise NotFoundException('Point is not found')
         return point
 
     @classmethod
@@ -41,16 +42,11 @@ class PointsBaseSingular(Resource):
     def patch(cls, **kwargs):
         data = PointsBaseSingular.parser.parse_args()
         point: PointModel = cls.get_point(**kwargs)
-        if point is None:
-            abort(404, message="Does not exist {}".format(kwargs))
-        try:
-            PointModel.filter_by_uuid(point.uuid).update(data)
-            PointModel.commit()
-            return PointModel.find_by_uuid(point.uuid)
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except Exception as e:
-            abort(500, message=str(e))
+        if not point:
+            raise NotFoundException(f"Does not exist {kwargs}")
+        PointModel.filter_by_uuid(point.uuid).update(data)
+        PointModel.commit()
+        return PointModel.find_by_uuid(point.uuid)
 
     @classmethod
     @abstractmethod

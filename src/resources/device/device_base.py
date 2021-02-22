@@ -1,12 +1,13 @@
-from flask_restful import Resource, reqparse, abort
-from sqlalchemy.exc import IntegrityError
+from flask_restful import reqparse
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src import db
 from src.lora import DeviceRegistry
 from src.models.model_device import DeviceModel
 
 
-class DeviceBase(Resource):
+class DeviceBase(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, required=True, store_missing=False)
     parser.add_argument('id', type=str, required=True, dest='device_id', store_missing=False)
@@ -17,15 +18,10 @@ class DeviceBase(Resource):
 
     @classmethod
     def add_device(cls, _uuid: str, data: dict):
-        try:
-            device: DeviceModel = DeviceModel(uuid=_uuid, **data)
-            device.save_to_db()
-            DeviceRegistry().add_device(device.device_id, device.uuid)
-            return device
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except Exception as e:
-            abort(500, message=str(e))
+        device: DeviceModel = DeviceModel(uuid=_uuid, **data)
+        device.save_to_db()
+        DeviceRegistry().add_device(device.device_id, device.uuid)
+        return device
 
     @classmethod
     def update_device(cls, device: DeviceModel, data: dict):
@@ -44,6 +40,6 @@ class DeviceBase(Resource):
     @classmethod
     def delete_device(cls, device):
         if not device:
-            abort(404, message=f'Device not found')
+            raise NotFoundException('Device not found')
         device.delete_from_db()
         DeviceRegistry().remove_device(device.device_id)

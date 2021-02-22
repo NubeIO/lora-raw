@@ -1,11 +1,12 @@
-from flask_restful import reqparse, marshal_with, Resource, abort
+from flask_restful import reqparse, marshal_with
+from rubix_http.resource import RubixResource
 
 from src.lora import SerialConnectionListener
 from src.models.model_network import NetworkModel
 from src.resources.model_fields import network_fields
 
 
-class SerialDriver(Resource):
+class SerialDriver(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('port', type=str, store_missing=False)
     parser.add_argument('baud_rate', type=int, store_missing=False)
@@ -23,11 +24,8 @@ class SerialDriver(Resource):
     @marshal_with(network_fields)
     def patch(self):
         data = SerialDriver.parser.parse_args()
-        try:
-            NetworkModel.filter_one().update(data)
-            new_serial_driver = NetworkModel.find_one()
-            NetworkModel.commit()
-            SerialConnectionListener().restart(new_serial_driver)
-            return new_serial_driver
-        except Exception as e:
-            abort(500, message=str(e))
+        NetworkModel.filter_one().update(data)
+        new_serial_driver = NetworkModel.find_one()
+        NetworkModel.commit()
+        SerialConnectionListener().restart(new_serial_driver)
+        return new_serial_driver

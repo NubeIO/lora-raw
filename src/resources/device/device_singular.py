@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
-from flask_restful import abort, marshal_with, reqparse
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.models.model_device import DeviceModel
 from src.resources.device.device_base import DeviceBase
@@ -21,7 +22,7 @@ class DeviceSingularBase(DeviceBase):
     def get(cls, value):
         device = cls.get_device(value)
         if not device:
-            abort(404, message='LoRa Device is not found')
+            raise NotFoundException('LoRa Device is not found')
         return device
 
     @classmethod
@@ -29,12 +30,9 @@ class DeviceSingularBase(DeviceBase):
     def patch(cls, value):
         data = DeviceSingularBase.parser_patch.parse_args()
         device = cls.get_device(value)
-        if device is None:
-            abort(404, message="Does not exist {}".format(value))
-        try:
-            return cls.update_device(device, data)
-        except Exception as e:
-            abort(500, message=str(e))
+        if not device:
+            raise NotFoundException(f"Does not exist {value}")
+        return cls.update_device(device, data)
 
     @classmethod
     def delete(cls, value):
