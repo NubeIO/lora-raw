@@ -17,8 +17,8 @@ api_lora.add_resource(DevicePlural, '/devices')
 api_lora.add_resource(PointsPlural, '/points')
 api_lora.add_resource(DeviceSingularByUUID, '/devices/uuid/<string:value>')
 api_lora.add_resource(DeviceSingularByName, '/devices/name/<string:value>')
-api_lora.add_resource(PointsSingularByUUID, '/points/uuid/<string:value>')
-api_lora.add_resource(PointsSingularByName, '/points/name/<string:value>')
+api_lora.add_resource(PointsSingularByUUID, '/points/uuid/<string:uuid>')
+api_lora.add_resource(PointsSingularByName, '/points/name/<string:device_name>/<string:point_name>')
 
 # lora to generic/bacnet points mappings
 bp_mapping_lp_gbp = Blueprint('mappings_lp_gbp', __name__, url_prefix='/api/mappings/lp_gbp')

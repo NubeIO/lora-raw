@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
-from flask_restful import abort, marshal_with, reqparse
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.models.model_device import DeviceModel
 from src.resources.device.device_base import DeviceBase
@@ -16,39 +17,42 @@ class DeviceSingularBase(DeviceBase):
     parser_patch.add_argument('description', type=str, store_missing=False)
     parser_patch.add_argument('enable', type=bool, store_missing=False)
 
+    @classmethod
     @marshal_with(device_fields)
-    def get(self, value):
-        device = self.get_device(value)
+    def get(cls, value):
+        device = cls.get_device(value)
         if not device:
-            abort(404, message='LoRa Device is not found')
+            raise NotFoundException('LoRa Device is not found')
         return device
 
+    @classmethod
     @marshal_with(device_fields)
-    def patch(self, value):
+    def patch(cls, value):
         data = DeviceSingularBase.parser_patch.parse_args()
-        device = self.get_device(value)
-        if device is None:
-            abort(404, message="Does not exist {}".format(value))
-        try:
-            return self.update_device(device, data)
-        except Exception as e:
-            abort(500, message=str(e))
+        device = cls.get_device(value)
+        if not device:
+            raise NotFoundException(f"Does not exist {value}")
+        return cls.update_device(device, data)
 
-    def delete(self, value):
-        device = self.get_device(value)
-        self.delete_device(device)
+    @classmethod
+    def delete(cls, value):
+        device = cls.get_device(value)
+        cls.delete_device(device)
         return '', 204
 
+    @classmethod
     @abstractmethod
-    def get_device(self, value):
+    def get_device(cls, value) -> DeviceModel:
         raise NotImplementedError('Need to implement')
 
 
 class DeviceSingularByUUID(DeviceSingularBase):
-    def get_device(self, value):
+    @classmethod
+    def get_device(cls, value) -> DeviceModel:
         return DeviceModel.find_by_uuid(value)
 
 
 class DeviceSingularByName(DeviceSingularBase):
-    def get_device(self, value):
+    @classmethod
+    def get_device(cls, value) -> DeviceModel:
         return DeviceModel.find_by_name(value)

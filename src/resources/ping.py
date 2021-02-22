@@ -2,8 +2,8 @@ import time
 from datetime import datetime
 
 from flask import current_app
-from flask_restful import Resource
 from mrb.brige import MqttRestBridge
+from rubix_http.resource import RubixResource
 
 from src.lora import SerialConnectionListener
 from src.mqtt import MqttClient
@@ -27,8 +27,9 @@ def get_up_time():
     return time.time() - startTime
 
 
-class Ping(Resource):
-    def get(self):
+class Ping(RubixResource):
+    @classmethod
+    def get(cls):
         up_time = get_up_time()
         up_min = up_time / 60
         up_min = round(up_min, 2)

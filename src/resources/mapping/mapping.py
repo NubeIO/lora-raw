@@ -1,8 +1,9 @@
 import uuid as uuid_
 from abc import abstractmethod
 
-from flask_restful import Resource, marshal_with, abort, reqparse
-from sqlalchemy.exc import IntegrityError
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.models.model_mapping import LPGBPointMapping
 from src.models.model_point_store import PointStoreModel
@@ -15,7 +16,7 @@ def sync_point_value(mapping: LPGBPointMapping):
     return mapping
 
 
-class LPGBPMappingResourceList(Resource):
+class LPGBPMappingResourceList(RubixResource):
     @classmethod
     @marshal_with(mapping_lp_gbp_fields)
     def get(cls):
@@ -31,37 +32,30 @@ class LPGBPMappingResourceList(Resource):
         parser.add_argument('lora_point_name', type=str, required=True)
         parser.add_argument('generic_point_name', type=str, default=None)
         parser.add_argument('bacnet_point_name', type=str, default=None)
-        try:
-            data = parser.parse_args()
-            data.uuid = str(uuid_.uuid4())
-            mapping: LPGBPointMapping = LPGBPointMapping(**data)
-            mapping.save_to_db()
-            sync_point_value(mapping)
-            return mapping
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except ValueError as e:
-            abort(400, message=str(e))
-        except Exception as e:
-            abort(500, message=str(e))
+
+        data = parser.parse_args()
+        data.uuid = str(uuid_.uuid4())
+        mapping: LPGBPointMapping = LPGBPointMapping(**data)
+        mapping.save_to_db()
+        sync_point_value(mapping)
+        return mapping
 
 
-class LPGBPMappingResourceBase(Resource):
+class LPGBPMappingResourceBase(RubixResource):
     @classmethod
     @marshal_with(mapping_lp_gbp_fields)
     def get(cls, uuid):
         mapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message=f'Does not exist {uuid}')
+            raise NotFoundException(f'Does not exist {uuid}')
         return mapping
 
     @classmethod
     def delete(cls, uuid):
         mapping = cls.get_mapping(uuid)
-        if mapping is None:
-            abort(404, message=f'Does not exist {uuid}')
-        else:
-            mapping.delete_from_db()
+        if not mapping:
+            raise NotFoundException(f'Does not exist {uuid}')
+        mapping.delete_from_db()
         return '', 204
 
     @classmethod
@@ -85,15 +79,12 @@ class LPGBPMappingResourceByUUID(LPGBPMappingResourceBase):
         data = LPGBPMappingResourceByUUID.parser.parse_args()
         mapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message='Does not exist {}'.format(uuid))
-        try:
-            LPGBPointMapping.filter_by_uuid(uuid).update(data)
-            LPGBPointMapping.commit()
-            output_mapping: LPGBPointMapping = cls.get_mapping(uuid)
-            sync_point_value(output_mapping)
-            return output_mapping
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f'Does not exist {uuid}')
+        LPGBPointMapping.filter_by_uuid(uuid).update(data)
+        LPGBPointMapping.commit()
+        output_mapping: LPGBPointMapping = cls.get_mapping(uuid)
+        sync_point_value(output_mapping)
+        return output_mapping
 
     @classmethod
     def get_mapping(cls, uuid) -> LPGBPointMapping:

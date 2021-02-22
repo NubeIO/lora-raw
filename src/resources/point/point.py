@@ -1,18 +1,20 @@
 from abc import abstractmethod
 
-from flask_restful import Resource, marshal_with, abort, reqparse
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.models.model_point import PointModel
 from src.resources.model_fields import point_fields_only, point_fields
 
 
-class PointsPlural(Resource):
+class PointsPlural(RubixResource):
     @marshal_with(point_fields)
     def get(self):
         return PointModel.find_all()
 
 
-class PointsBaseSingular(Resource):
+class PointsBaseSingular(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, store_missing=False)
     parser.add_argument('device_point_name', type=str, store_missing=False)
@@ -27,30 +29,38 @@ class PointsBaseSingular(Resource):
     parser.add_argument('scale_min', type=int, store_missing=False)
     parser.add_argument('scale_max', type=int, store_missing=False)
 
-    @marshal_with(point_fields_only)
-    def patch(self, value):
-        data = PointsBaseSingular.parser.parse_args()
-        point = self.get_point(value)
-        if point.first() is None:
-            abort(404, message="Does not exist {}".format(value))
-        try:
-            uuid = point.first().uuid
-            point.update(data)
-            PointModel.commit()
-            return PointModel.find_by_uuid(uuid)
-        except Exception as e:
-            abort(500, message=str(e))
+    @classmethod
+    @marshal_with(point_fields)
+    def get(cls, **kwargs):
+        point: PointModel = cls.get_point(**kwargs)
+        if not point:
+            raise NotFoundException('Point is not found')
+        return point
 
+    @classmethod
+    @marshal_with(point_fields_only)
+    def patch(cls, **kwargs):
+        data = PointsBaseSingular.parser.parse_args()
+        point: PointModel = cls.get_point(**kwargs)
+        if not point:
+            raise NotFoundException(f"Does not exist {kwargs}")
+        PointModel.filter_by_uuid(point.uuid).update(data)
+        PointModel.commit()
+        return PointModel.find_by_uuid(point.uuid)
+
+    @classmethod
     @abstractmethod
-    def get_point(self, value):
+    def get_point(cls, value) -> PointModel:
         raise NotImplementedError('Need to implement')
 
 
 class PointsSingularByUUID(PointsBaseSingular):
-    def get_point(self, value):
-        return PointModel.filter_by_uuid(value)
+    @classmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        return PointModel.find_by_uuid(kwargs.get('uuid'))
 
 
 class PointsSingularByName(PointsBaseSingular):
-    def get_point(self, value):
-        return PointModel.filter_by_name(value)
+    @classmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        return PointModel.find_by_name(kwargs.get('device_name'), kwargs.get('point_name'))
