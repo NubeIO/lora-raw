@@ -1,4 +1,11 @@
 # CHANGELOG
+## [v1.3.2](https://github.com/NubeIO/lora-raw/tree/v1.3.2) (2020-02-22)
+### Added
+- Support for Generic Point payload write
+- Edit lora patch point URL
+- Add validation on fields network, device, point name
+- Implement rubix-http for standardizing HTTP error msg
+
 ## [v1.3.1](https://github.com/NubeIO/lora-raw/tree/v1.3.1) (2020-02-16)
 ### Added
 - Updates to protocl bridge
@@ -11,7 +18,7 @@
 ### Added
 - Allow unknown options & ignore while running app
 
-## [v1.2.8](https://github.com/NubeIO/lora-raw/tree/v1.2.2) (2020-02-08)
+## [v1.2.8](https://github.com/NubeIO/lora-raw/tree/v1.2.8) (2020-02-08)
 ### Added
 - JSON string publish instead of python dictionary
 
@@ -35,15 +42,11 @@
 - Dockerize
 
 ## [v1.1.0-rc.2](https://github.com/NubeIO/lora-raw/tree/v1.1.0-rc.2) (2020-12-28)
-
 ### Changed
-
 - Change setting file format from `.ini` to `.json`
 
 ## [v1.1.0-rc.1](https://github.com/NubeIO/lora-raw/tree/v1.1.0-rc.1) (2020-12-28)
-
 ### Added
-
 - **Breaking Changes**: Make delivery artifact as `binary`
 - Change setting.conf format
 - Dockerize
