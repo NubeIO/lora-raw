@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.3](https://github.com/NubeIO/lora-raw/tree/v1.3.3) (2020-02-22)
+### Added
+- Upgrade rubix-http version
+
 ## [v1.3.2](https://github.com/NubeIO/lora-raw/tree/v1.3.2) (2020-02-22)
 ### Added
 - Support for Generic Point payload write
