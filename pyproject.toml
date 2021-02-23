@@ -12,10 +12,9 @@ gevent = [
     { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
 ]
 pyserial = "^3.5"
-paho-mqtt = "^1.5.1"
 click = "^7.1.2"
 toml = "^0.10.2"
-mqtt-rest-bridge = {git = "https://github.com/NubeIO/mqtt-rest-bridge", rev = "v1.1.1"}
+mqtt-rest-bridge = {git = "https://github.com/NubeIO/mqtt-rest-bridge", rev = "v1.1.2"}
 rubix-http = {git = "https://github.com/NubeIO/rubix-http", rev = "v1.0.1"}
 
 [tool.poetry.dev-dependencies]

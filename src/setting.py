@@ -4,6 +4,7 @@ from abc import ABC
 
 from flask import Flask
 from mrb.setting import MqttSetting as MqttRestBridgeSetting
+from rubix_mqtt.setting import MqttSettingBase
 
 
 class BaseSetting(ABC):
@@ -35,21 +36,12 @@ class SerialSetting(BaseSetting):
         self.encryption_key = ''
 
 
-class MqttSetting(BaseSetting):
+class MqttSetting(MqttSettingBase):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True
+        super().__init__()
         self.name = 'lora-raw-mqtt'
-        self.host = '0.0.0.0'
-        self.port = 1883
-        self.authentication = False
-        self.username = 'username'
-        self.password = 'password'
-        self.keepalive = 60
-        self.qos = 1
-        self.retain = False
-        self.attempt_reconnect_on_unavailable = True
         self.attempt_reconnect_secs = 5
         self.topic = 'rubix/lora_raw/value'
         self.publish_raw = True
