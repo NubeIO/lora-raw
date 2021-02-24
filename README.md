@@ -60,3 +60,27 @@ Options:
                                   Logging level
   -h, --help                      Show this message and exit.
 ```
+
+### MQTT client
+
+##### Topic structure
+Publish value topic
+
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/lora_raw/value/<device_id>/<device_name>
+```
+
+Raw topic
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/lora_raw/raw
+```
+
+Debug topic
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/lora_raw/debug
+```
+
+Debug topic example
+```
++/+/+/+/+/+/rubix/points/debug
+```

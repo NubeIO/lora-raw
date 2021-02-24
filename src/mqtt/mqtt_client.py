@@ -1,7 +1,7 @@
 import logging
-import time
 
-import paho.mqtt.client as mqtt_client
+from registry.registry import RubixRegistry
+from rubix_mqtt.mqtt import MqttClientBase
 
 from src import MqttSetting
 from src.utils import Singleton
@@ -9,73 +9,54 @@ from src.utils import Singleton
 logger = logging.getLogger(__name__)
 
 
-class MqttClient(metaclass=Singleton):
+def allow_only_on_prefix(func):
+    def inner_function(*args, **kwargs):
+        prefix_topic: str = MqttClient.prefix_topic()
+        if not prefix_topic:
+            return
+        func(*args, **kwargs)
 
-    def __init__(self):
-        self.__config = None
-        self.__client = None
+    return inner_function
+
+
+class MqttClient(MqttClientBase, metaclass=Singleton):
+    SEPARATOR: str = '/'
 
     @property
     def config(self) -> MqttSetting:
-        return self.__config
+        return super().config
 
-    def status(self) -> bool:
-        return bool(self.__client.is_connected() if self.config and self.config.enabled and self.__client else False)
+    @allow_only_on_prefix
+    def publish_value(self, topic_suffix: str, payload: str):
+        if self.config.publish_value:
+            self.__publish_mqtt_value(self.make_topic((self.config.topic, topic_suffix)), payload)
 
-    def start(self, config: MqttSetting):
-        self.__config = config
-        self.__client = mqtt_client.Client(self.config.name)
-        if self.config.authentication:
-            self.__client.username_pw_set(self.config.username, self.config.password)
-        self.__client.on_connect = self.__on_connect
-        if self.config.attempt_reconnect_on_unavailable:
-            while True:
-                try:
-                    self.__client.connect(config.host, config.port, config.keepalive)
-                    break
-                except ConnectionRefusedError:
-                    logger.error(
-                        'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in {} seconds'.format(
-                            config.attempt_reconnect_secs))
-                    time.sleep(config.attempt_reconnect_secs)
-        else:
-            try:
-                self.__client.connect(config.host, config.port, config.keepalive)
-            except Exception as e:
-                self.__client = None
-                logger.error(str(e))
-                return
-        logger.info(f'MQTT client {self.config.name} connected {self.to_string()}')
-        self.__client.loop_forever()
+    @allow_only_on_prefix
+    def publish_raw(self, payload: str):
+        if self.config.publish_raw:
+            self.__publish_mqtt_value(self.make_topic((self.config.raw_topic,)), payload)
 
-    def to_string(self) -> str:
-        return f'{self.config.host}:{self.config.port}'
+    @allow_only_on_prefix
+    def publish_debug(self, payload: str):
+        if self.config.publish_debug:
+            self.__publish_mqtt_value(self.make_topic((self.config.debug_topic,)), payload)
 
-    def get_topic(self, name):
-        return "{}/{}".format(self.config.topic, name)
-
-    def publish_mqtt_value(self, topic, payload):
+    def __publish_mqtt_value(self, topic: str, payload: str):
         if not self.status():
+            logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
-        logger.debug(
-            "MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, payload, self.config.retain))
-        self.__client.publish(topic, str(payload), qos=self.config.qos, retain=self.config.retain)
+        logger.debug(f"MQTT_PUBLISH: 'topic': {topic}, 'payload': {payload}, 'retain': {self.config.retain}")
+        self.client.publish(topic, str(payload), qos=self.config.qos, retain=self.config.retain)
 
-    def publish_raw(self, payload):
-        self.publish_mqtt_value(self.config.raw_topic, payload)
+    @classmethod
+    def prefix_topic(cls) -> str:
+        wires_plat: dict = RubixRegistry().read_wires_plat()
+        if not wires_plat:
+            logger.error('Please add wires-plat on Rubix Service')
+            return ''
+        return MqttClient.SEPARATOR.join((wires_plat.get('client_id'), wires_plat.get('client_name'),
+                                          wires_plat.get('site_id'), wires_plat.get('site_name'),
+                                          wires_plat.get('device_id'), wires_plat.get('device_name')))
 
-    def publish_debug(self, payload):
-        self.publish_mqtt_value(self.config.debug_topic, payload)
-
-    def __on_connect(self, client, userdata, flags, reason_code, properties=None):
-        if reason_code > 0:
-            reasons = {
-                1: 'Connection refused - incorrect protocol version',
-                2: 'Connection refused - invalid client identifier',
-                3: 'Connection refused - serial_driver unavailable',
-                4: 'Connection refused - bad username or password',
-                5: 'Connection refused - not authorised'
-            }
-            reason = reasons.get(reason_code, 'unknown')
-            self.__client = None
-            raise Exception("MQTT Connection Failure: {}".format(reason))
+    def make_topic(self, parts: tuple) -> str:
+        return MqttClient.SEPARATOR.join((self.prefix_topic(),) + parts)
