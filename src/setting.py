@@ -43,6 +43,7 @@ class MqttSetting(MqttSettingBase):
         super().__init__()
         self.name = 'lora-raw-mqtt'
         self.attempt_reconnect_secs = 5
+        self.publish_value = True
         self.topic = 'rubix/lora_raw/value'
         self.publish_raw = True
         self.raw_topic = 'rubix/lora_raw/raw'
