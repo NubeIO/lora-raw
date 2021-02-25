@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.3.4](https://github.com/NubeIO/lora-raw/tree/v1.3.4) (2020-02-25)
+### Added
+- Use rubix-mqtt base
+- Standardize MQTT publish topic
+
 ## [v1.3.3](https://github.com/NubeIO/lora-raw/tree/v1.3.3) (2020-02-22)
 ### Added
 - Upgrade rubix-http version
