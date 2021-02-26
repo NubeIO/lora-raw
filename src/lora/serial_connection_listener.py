@@ -144,6 +144,6 @@ class SerialConnectionListener(metaclass=Singleton):
                             point_store = point.point_store
                             point_store.value_original = payload[key]
                             point.update_point_value(point.point_store)
-                self.__temp_mqttc.publish_value(self.__temp_mqttc.make_topic((device.device_id, device.name)), payload)
+                self.__temp_mqttc.publish_value((device.device_id, device.name), payload)
         elif data:
             logger.debug("Raw serial: {}".format(data))
