@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.3.6](https://github.com/NubeIO/lora-raw/tree/v1.3.6) (2020-03-03)
+### Added
+- Upgrade mqtt-rest-bridge (listener issue fix)
+- Separate data and config files
+
 ## [v1.3.5](https://github.com/NubeIO/lora-raw/tree/v1.3.5) (2020-02-26)
 ### Added
 - MQTT publish value topic issue fix
