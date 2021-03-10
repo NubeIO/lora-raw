@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.7](https://github.com/NubeIO/lora-raw/tree/v1.3.7) (2020-03-10)
+### Added
+- Point Server Generic API uuid/name change support
+
 ## [v1.3.6](https://github.com/NubeIO/lora-raw/tree/v1.3.6) (2020-03-03)
 ### Added
 - Upgrade mqtt-rest-bridge (listener issue fix)
