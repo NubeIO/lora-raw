@@ -23,7 +23,7 @@ class LPGBPointMapping(ModelBase):
     @validates('generic_point_uuid')
     def validate_generic_point_uuid(self, _, value):
         if value:
-            response: Response = api_to_topic_mapper(api=f'/api/generic/points/{value}',
+            response: Response = api_to_topic_mapper(api=f'/api/generic/points/uuid/{value}',
                                                      destination_identifier='ps', http_method=HttpMethod.GET)
             if response.error:
                 raise ValueError(response.error_message)
